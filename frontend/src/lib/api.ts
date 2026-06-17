@@ -142,6 +142,9 @@ export const aiApi = {
       history?: string[];
     };
   }): Promise<string> => {
+    if (!body.mcpServer) {
+      body.mcpServer = `${BASE}/mcp`;
+    }
     const res = await fetch(`${BASE}/ai/prompt`, {
       method: "POST",
       credentials: "include",
