@@ -4,6 +4,8 @@ import { getTenantCorsair } from "../../common/utils/corsair-tenant.js";
 import { inngest } from "../../common/config/inngest.client.js";
 import { ApiError } from "../../common/utils/api-error.js";
 import { ok } from "../../common/utils/response.js";
+import { canAccessWorkflow } from "../../common/utils/rbac.js";
+import type { WorkflowId, UserRole } from "../../common/utils/rbac.js";
 import type {
   ListMessagesQuery,
   GetMessageQuery,
@@ -25,19 +27,21 @@ import type {
   NormalizedLabel,
 } from "./gmail.types.js";
 
+const WORKFLOW_TO_INNGEST_EVENT: Record<WorkflowId, string> = {
+  "weekly-digest": "digest/weekly.requested",
+  "daily-digest": "digest/daily.requested",
+  "unsubscribe-suggestions": "digest/unsubscribe.requested",
+  "followup-scan": "digest/followup-scan.requested",
+  "bulk-cleanup": "digest/bulk-cleanup.requested",
+  "week-prep-briefing": "calendar/week-prep.requested",
+  "conflict-detection": "calendar/conflict-detection.requested",
+  "email-priority": "email/received",
+};
+
 export class GmailController {
   private getTenant(req: Request) {
     return getTenantCorsair(req.user);
   }
-
-  private static readonly WORKFLOW_EVENTS: Record<string, string> = {
-    "weekly-digest": "digest/weekly.requested",
-    "daily-digest": "digest/daily.requested",
-    "unsubscribe-suggestions": "digest/unsubscribe.requested",
-    "followup-scan": "digest/followup-scan.requested",
-    "week-prep-briefing": "calendar/week-prep.requested",
-    "conflict-detector": "calendar/conflict-detection.requested",
-  };
 
   runWorkflow = async (
     req: Request<{ workflowId: string }>,
@@ -45,15 +49,25 @@ export class GmailController {
     next: NextFunction,
   ) => {
     try {
-      const eventName = GmailController.WORKFLOW_EVENTS[req.params.workflowId];
+      const workflowId = req.params.workflowId as WorkflowId;
+      const inngestEventName = WORKFLOW_TO_INNGEST_EVENT[workflowId];
 
-      if (!eventName) {
-        throw ApiError.badRequest(`Unknown workflow: ${req.params.workflowId}`);
+      if (!inngestEventName) {
+        throw ApiError.badRequest(`Unknown workflow: ${workflowId}`);
+      }
+
+      const userRole = (req.userRole ?? "user") as UserRole;
+      const userHasAccess = canAccessWorkflow(userRole, workflowId);
+
+      if (!userHasAccess) {
+        throw ApiError.forbidden(
+          `Your current plan does not include access to '${workflowId}'. Please upgrade to use this workflow.`,
+        );
       }
 
       await inngest.send({
-        name: eventName,
-        data: { tenantId: req.user as string },
+        name: inngestEventName,
+        data: { tenantId: req.user },
       });
 
       return ok(
@@ -78,7 +92,6 @@ export class GmailController {
   };
 
   syncMessages = async (req: Request, res: Response, next: NextFunction) => {
-    // console.log("Syncing messages...");
     try {
       const result = await gmailServices.syncAllMessages(
         this.getTenant(req),

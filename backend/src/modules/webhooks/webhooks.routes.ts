@@ -4,6 +4,9 @@ import { corsair } from "../../corsair.js";
 import { inngest } from "../../common/config/inngest.client.js";
 import { getExistingPriorityLabelIds } from "../inngest/email.functions.js";
 import { sendEventToUser } from "../sse/sse.service.js";
+import { findUserById } from "../auth/auth.queries.js";
+import { canAccessWorkflow } from "../../common/utils/rbac.js";
+import type { UserRole } from "../../common/utils/rbac.js";
 import type {
   WebhookProcessedResult,
   CorsairGmailMessageRow,
@@ -52,6 +55,20 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
     const messageId = result.body?.message?.messageId;
 
     console.info("[webhook] gmail messageChanged, messageId:", messageId);
+
+    const user = await findUserById(tenantId);
+    const userRole = (user?.role ?? "user") as UserRole;
+    const userCanPrioritizeEmail = canAccessWorkflow(
+      userRole,
+      "email-priority",
+    );
+
+    if (!userCanPrioritizeEmail) {
+      console.info(
+        `[webhook] skip inngest — role '${userRole}' lacks email-priority access for tenant ${tenantId}`,
+      );
+      return res.status(200).json(result.response);
+    }
 
     const tenantCorsair = corsair.withTenant(tenantId);
 
