@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authApi } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
@@ -11,7 +11,7 @@ type ConnectionStatus = {
   googlecalendar: boolean;
 };
 
-export default function ConnectPage() {
+function ConnectPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const auth = useAuth();
@@ -411,5 +411,13 @@ export default function ConnectPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ConnectPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConnectPageInner />
+    </Suspense>
   );
 }
