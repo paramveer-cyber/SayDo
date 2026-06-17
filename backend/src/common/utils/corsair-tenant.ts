@@ -4,20 +4,26 @@ import { isRecoverableAuthHiccup } from "./corsair-error.js";
 type AnyFunction = (...args: unknown[]) => Promise<unknown>;
 type AnyRecord = Record<string, unknown>;
 
-const AUTH_RETRY_DELAY_MS = 750;
+const AUTH_RETRY_DELAYS_MS = [300, 750, 1500];
 
 const withAuthRetry =
   (apiCall: AnyFunction): AnyFunction =>
   async (...args: unknown[]) => {
-    try {
-      return await apiCall(...args);
-    } catch (firstAttemptError) {
-      if (!isRecoverableAuthHiccup(firstAttemptError)) {
-        throw firstAttemptError;
+    let lastError: unknown;
+    for (const delayMs of [0, ...AUTH_RETRY_DELAYS_MS]) {
+      if (delayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
-      await new Promise((resolve) => setTimeout(resolve, AUTH_RETRY_DELAY_MS));
-      return await apiCall(...args);
+      try {
+        return await apiCall(...args);
+      } catch (err) {
+        lastError = err;
+        if (!isRecoverableAuthHiccup(err)) {
+          throw err;
+        }
+      }
     }
+    throw lastError;
   };
 
 const wrapApiTreeWithRetry = (apiNode: AnyRecord): AnyRecord => {

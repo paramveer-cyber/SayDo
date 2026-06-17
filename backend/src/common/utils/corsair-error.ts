@@ -21,8 +21,12 @@ export const isUnauthorizedFromUpstream = (error: Error): boolean =>
 export const isTokenRefreshFailure = (error: Error): boolean =>
   /failed to (obtain valid|refresh) access token/i.test(error.message);
 
+const isDelegationDenied = (error: Error): boolean =>
+  /delegation denied/i.test(error.message);
+
 export const isRecoverableAuthHiccup = (error: unknown): boolean =>
   error instanceof Error &&
+  !isDelegationDenied(error) &&
   (isTokenRefreshFailure(error) || isUnauthorizedFromUpstream(error));
 
 export const mapCorsairError = (error: unknown): ApiError | null => {
@@ -41,7 +45,13 @@ export const mapCorsairError = (error: unknown): ApiError | null => {
     );
   }
 
-  if (isTokenRefreshFailure(error) || isUnauthorizedFromUpstream(error)) {
+  if (isTokenRefreshFailure(error)) {
+    return ApiError.internal(
+      "Failed to refresh access token. Please try again.",
+    );
+  }
+
+  if (isUnauthorizedFromUpstream(error)) {
     return ApiError.unAuthorized(
       "Connected account's access has expired. Please reconnect it.",
     );

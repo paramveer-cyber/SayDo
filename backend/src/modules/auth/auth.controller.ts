@@ -229,16 +229,49 @@ export const oauthCallback = async (
 
     if (result.plugin === "gmail") {
       const tenantCorsair = getTenantCorsair(result.tenantId);
-      syncAllMessages(tenantCorsair, {}).catch((err) =>
+
+      const [existingGmailAccount] = await db
+        .select()
+        .from(corsairAccounts)
+        .where(
+          and(
+            eq(corsairAccounts.tenantId, result.tenantId),
+            eq(corsairAccounts.integrationId, "gmail"),
+          ),
+        )
+        .limit(1);
+
+      if (existingGmailAccount) {
+        try {
+          await stopGmailWatch(tenantCorsair, result.tenantId);
+        } catch (err) {
+          console.error("Gmail watch teardown on reconnect failed:", err);
+        }
+
+        await db
+          .delete(corsairEvents)
+          .where(eq(corsairEvents.accountId, existingGmailAccount.id));
+        await db
+          .delete(corsairEntities)
+          .where(eq(corsairEntities.accountId, existingGmailAccount.id));
+        await db
+          .delete(corsairAccounts)
+          .where(eq(corsairAccounts.id, existingGmailAccount.id));
+
+        evictTenantFromCache(result.tenantId);
+      }
+
+      const freshTenantCorsair = getTenantCorsair(result.tenantId);
+
+      syncAllMessages(freshTenantCorsair, {}).catch((err) =>
         console.error("Gmail backfill sync failed:", err),
       );
-      if (result.plugin === "gmail") {
-        setupGmailWatch(tenantCorsair, result.tenantId)
-          .then((data) => {
-            console.log("Successfully done", data);
-          })
-          .catch((err) => console.error("Gmail watch setup failed:", err));
-      }
+
+      setupGmailWatch(freshTenantCorsair, result.tenantId)
+        .then((data) => {
+          console.log("Gmail watch setup done", data);
+        })
+        .catch((err) => console.error("Gmail watch setup failed:", err));
     }
 
     const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3001";
