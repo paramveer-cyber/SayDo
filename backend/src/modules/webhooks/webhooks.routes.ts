@@ -30,9 +30,20 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
 
   console.info("[webhook] incoming");
 
-  const result = (await processWebhook(corsair, headers, body, {
-    ...(tenantId && { tenantId }),
-  })) as WebhookProcessedResult;
+  let result: WebhookProcessedResult;
+  try {
+    result = (await processWebhook(corsair, headers, body, {
+      ...(tenantId && { tenantId }),
+    })) as WebhookProcessedResult;
+  } catch (webhookError) {
+    console.error(
+      "[webhook] processWebhook failed, acking to stop retries:",
+      webhookError,
+    );
+    return res
+      .status(200)
+      .json({ success: false, message: "Webhook processing failed" });
+  }
 
   console.info("[webhook] processed", result.plugin, result.action);
 
@@ -44,7 +55,7 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
 
   if (!result.response) {
     return res
-      .status(404)
+      .status(200)
       .json({ success: false, message: "No matching webhook handler found" });
   }
 
