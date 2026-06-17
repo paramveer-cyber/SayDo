@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { paymentApi } from "../lib/api";
 
-type PaymentState = "idle" | "creating_order" | "verifying" | "success" | "error";
+type PaymentState =
+  | "idle"
+  | "creating_order"
+  | "verifying"
+  | "success"
+  | "error";
 
 type PaidRole = "bronze_subscriber" | "silver_subscriber" | "gold_subscriber";
 
@@ -68,7 +73,8 @@ export default function RazorpayCheckoutButton({
     try {
       orderData = await paymentApi.createOrder(amountInPaise, currency);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create order";
+      const message =
+        err instanceof Error ? err.message : "Failed to create order";
       setErrorMessage(message);
       setPaymentState("error");
       onError?.(message);
@@ -82,6 +88,11 @@ export default function RazorpayCheckoutButton({
       name: productName,
       description: productDescription,
       order_id: orderData.order_id,
+      prefill: {
+        name: "",
+        email: "",
+        contact: "",
+      },
       handler: async (paymentResponse) => {
         setPaymentState("verifying");
         try {
@@ -94,7 +105,8 @@ export default function RazorpayCheckoutButton({
           setPaymentState("success");
           onSuccess?.(verifyResult.new_role);
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Payment verification failed";
+          const message =
+            err instanceof Error ? err.message : "Payment verification failed";
           setErrorMessage(message);
           setPaymentState("error");
           onError?.(message);
@@ -120,10 +132,14 @@ export default function RazorpayCheckoutButton({
     razorpayModal.open();
   }
 
-  const isProcessing = paymentState === "creating_order" || paymentState === "verifying";
+  const isProcessing =
+    paymentState === "creating_order" || paymentState === "verifying";
   const isSuccess = paymentState === "success";
 
-  const borderColor = accentColor === "var(--border-strong)" ? "var(--border-strong)" : accentColor;
+  const borderColor =
+    accentColor === "var(--border-strong)"
+      ? "var(--border-strong)"
+      : accentColor;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -139,29 +155,31 @@ export default function RazorpayCheckoutButton({
           background: isSuccess
             ? "var(--green-dim)"
             : inverted
-            ? "var(--bg)"
-            : "transparent",
+              ? "var(--bg)"
+              : "transparent",
           color: isSuccess
             ? "var(--green)"
             : inverted
-            ? "var(--fg)"
-            : inverted
-            ? "var(--bg)"
-            : "var(--fg)",
+              ? "var(--fg)"
+              : inverted
+                ? "var(--bg)"
+                : "var(--fg)",
           border: inverted
             ? "none"
             : isSuccess
-            ? "1px solid var(--green)"
-            : `1px solid ${borderColor}`,
+              ? "1px solid var(--green)"
+              : `1px solid ${borderColor}`,
           cursor: isProcessing || isSuccess ? "not-allowed" : "pointer",
           fontFamily: "inherit",
           width: "100%",
           opacity: isProcessing ? 0.6 : 1,
           transition: "opacity 0.15s",
-          clipPath: "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
+          clipPath:
+            "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
         }}
         onMouseEnter={(e) => {
-          if (!isProcessing && !isSuccess) e.currentTarget.style.opacity = "0.8";
+          if (!isProcessing && !isSuccess)
+            e.currentTarget.style.opacity = "0.8";
         }}
         onMouseLeave={(e) => {
           if (!isProcessing && !isSuccess) e.currentTarget.style.opacity = "1";
@@ -174,7 +192,13 @@ export default function RazorpayCheckoutButton({
       </button>
 
       {errorMessage && (
-        <span style={{ color: "var(--red)", fontSize: "0.65rem", letterSpacing: "0.04em" }}>
+        <span
+          style={{
+            color: "var(--red)",
+            fontSize: "0.65rem",
+            letterSpacing: "0.04em",
+          }}
+        >
           {errorMessage}
         </span>
       )}
