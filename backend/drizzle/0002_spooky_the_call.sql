@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "connected_plugins" jsonb DEFAULT '{}'::jsonb NOT NULL;

@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "connections" jsonb DEFAULT '{}'::jsonb NOT NULL;
