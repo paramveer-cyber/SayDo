@@ -1,0 +1,1 @@
+{"version":3,"file":"connections.config.d.ts","sourceRoot":"","sources":["../../../../src/modules/connections/connections.config.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,QAAQ,GAAG,OAAO,GAAG,gBAAgB,CAAC;AAElD,eAAO,MAAM,aAAa,EAAE,MAAM,CAAC,QAAQ,EAAE,MAAM,EAAE,CASpD,CAAC;AAEF,eAAO,MAAM,UAAU,EAAiC,QAAQ,EAAE,CAAC;AAEnE,eAAO,MAAM,UAAU,GAAI,OAAO,MAAM,KAAG,KAAK,IAAI,QACZ,CAAC"}

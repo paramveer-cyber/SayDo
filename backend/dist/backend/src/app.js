@@ -1,0 +1,32 @@
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import { createBaseMcpServer, createMcpRouter } from "@corsair-dev/mcp";
+import { corsair } from "./corsair.js";
+import { aiCorsairRouter } from "./modules/corsair_ai/corsair.routes.js";
+import { gmailRouter } from "./modules/gmail/gmail.routes.js";
+import { googleCalendarRouter } from "./modules/googlecalendar/googlecalendar.routes.js";
+import { webhooksRouter } from "./modules/webhooks/webhooks.routes.js";
+import errorHandler from "./common/middleware/error.middleware.js";
+import { authRouter } from "./modules/auth/auth.routes.js";
+import { authMiddleware } from "./modules/auth/auth.middleware.js";
+import cookieParser from "cookie-parser";
+const app = express();
+app.use(cors({ origin: "http://localhost:3001", credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
+app.use("/webhooks", webhooksRouter);
+app.use("/auth", authRouter);
+app.use("/ai", authMiddleware, aiCorsairRouter);
+app.use("/gmail", authMiddleware, gmailRouter);
+app.use("/calendar", authMiddleware, googleCalendarRouter);
+let currentUserId = null;
+app.use("/mcp", authMiddleware, (req, _res, next) => {
+    currentUserId = req.user;
+    next();
+}, createMcpRouter(() => createBaseMcpServer({ corsair: corsair.withTenant(currentUserId) })));
+app.use((_req, res) => res.status(404).json({ message: "Route not found" }));
+app.use(errorHandler);
+export { app };
+//# sourceMappingURL=app.js.map
