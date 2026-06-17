@@ -11,7 +11,7 @@ import {
 import { resolveAiModel } from "../../common/utils/aiProvider.js";
 import type { AiProviderOptions } from "../../common/utils/aiProvider.js";
 
-const DEFAULT_MCP_URL = "http://localhost:3000/mcp";
+const DEFAULT_MCP_URL = `http://127.0.0.1:${process.env.PORT ?? 3000}/mcp`;
 
 const AI_SYSTEM_PROMPT = `You are an assistant with access to Corsair tools. You also have the full conversation history of this chat session available in the prior messages. For any question about what was said earlier in THIS chat session (e.g. "what was my last message", "what did I just ask") answer directly from that conversation history, do not call a tool for it.
 Follow this exact sequence for every request:
