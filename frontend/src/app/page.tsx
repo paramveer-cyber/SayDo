@@ -908,6 +908,24 @@ export default function LandingPage() {
           >
             Gmail · Calendar · AI
           </span>
+          <a
+            href="/pricing"
+            style={{
+              fontSize: "0.62rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--fg-dim)",
+              fontWeight: 600,
+              textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.color = "var(--fg-dim)")
+            }
+          >
+            Pricing
+          </a>
           <button
             onClick={() => router.push(primaryHref)}
             style={{
@@ -1811,55 +1829,232 @@ export default function LandingPage() {
         style={{
           position: "relative",
           zIndex: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "1.5rem 2.5rem",
+          borderTop: "1px solid var(--border)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        {/* Footer top row — links grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          {/* Brand col */}
           <div
             style={{
-              width: 22,
-              height: 22,
-              background: "var(--red)",
+              padding: "2.5rem 2.5rem",
+              borderRight: "1px solid var(--border)",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              clipPath: "polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%)",
+              flexDirection: "column",
+              gap: "1rem",
             }}
           >
-            <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M3 13L8 3L13 13"
-                stroke="#fff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}
+            >
+              <img
+                src="/icon.png"
+                alt="Corsair"
+                style={{ width: 28, height: 28, objectFit: "cover" }}
               />
-              <path
-                d="M5 9.5H11"
-                stroke="#fff"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+              <span
+                style={{
+                  fontWeight: 900,
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}
+              >
+                SayDo
+              </span>
+            </div>
+            <p
+              style={{
+                fontSize: "0.72rem",
+                lineHeight: 1.65,
+                color: "var(--fg-dim)",
+                margin: 0,
+                maxWidth: 220,
+              }}
+            >
+              AI assistant for Gmail and Google Calendar. You say it, we do it.
+            </p>
           </div>
-          <span
+
+          {/* Product links */}
+          <div
             style={{
-              fontWeight: 800,
-              fontSize: "0.75rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
+              padding: "2.5rem 2.5rem",
+              borderRight: "1px solid var(--border)",
             }}
           >
-            SayDo
-          </span>
+            <div
+              style={{
+                fontSize: "0.52rem",
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--fg-dim)",
+                marginBottom: "1.25rem",
+              }}
+            >
+              Product
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+              }}
+            >
+              <a
+                href={primaryHref}
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "var(--fg)",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--yellow)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--fg)")
+                }
+              >
+                <div
+                  style={{
+                    width: 4,
+                    height: 4,
+                    background: "var(--yellow)",
+                    flexShrink: 0,
+                  }}
+                />
+                {primaryLabel}
+              </a>
+              <a
+                href="/pricing"
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "var(--fg)",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--blue)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--fg)")
+                }
+              >
+                <div
+                  style={{
+                    width: 4,
+                    height: 4,
+                    background: "var(--blue)",
+                    flexShrink: 0,
+                  }}
+                />
+                Pricing
+              </a>
+            </div>
+          </div>
+
+          {/* Legal links */}
+          <div style={{ padding: "2.5rem 2.5rem" }}>
+            <div
+              style={{
+                fontSize: "0.52rem",
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--fg-dim)",
+                marginBottom: "1.25rem",
+              }}
+            >
+              Legal
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+              }}
+            >
+              {[
+                {
+                  label: "Terms of Service",
+                  href: "/tos",
+                  color: "var(--red)",
+                },
+                {
+                  label: "Privacy Policy",
+                  href: "/privacy",
+                  color: "var(--green)",
+                },
+              ].map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "var(--fg)",
+                    textDecoration: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = link.color)
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "var(--fg)")
+                  }
+                >
+                  <div
+                    style={{
+                      width: 4,
+                      height: 4,
+                      background: link.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+
+        {/* Footer bottom bar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "1rem 2.5rem",
+          }}
+        >
           <span
             style={{
-              fontSize: "0.55rem",
+              fontSize: "0.52rem",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--fg-dim)",
@@ -1868,40 +2063,11 @@ export default function LandingPage() {
           >
             AI assistant · Gmail + Google Calendar
           </span>
-          <div style={{ display: "flex", gap: "1.25rem" }}>
-            {[
-              { label: "Pricing", href: "/pricing" },
-              { label: "Terms", href: "/tos" },
-              { label: "Privacy", href: "/privacy" },
-            ].map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                style={{
-                  fontSize: "0.52rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--fg-dim)",
-                  textDecoration: "none",
-                  transition: "color 0.15s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "var(--fg)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "var(--fg-dim)")
-                }
-              >
-                {link.label}
-              </a>
-            ))}
+          <div style={{ display: "flex", gap: "0.4rem" }}>
+            <div style={{ width: 7, height: 7, background: "var(--red)" }} />
+            <div style={{ width: 7, height: 7, background: "var(--yellow)" }} />
+            <div style={{ width: 7, height: 7, background: "var(--blue)" }} />
           </div>
-        </div>
-        <div style={{ display: "flex", gap: "0.4rem" }}>
-          <div style={{ width: 7, height: 7, background: "var(--red)" }} />
-          <div style={{ width: 7, height: 7, background: "var(--yellow)" }} />
-          <div style={{ width: 7, height: 7, background: "var(--blue)" }} />
         </div>
       </footer>
     </div>

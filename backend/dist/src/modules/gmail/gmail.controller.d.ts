@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from "express";
 import type { GetMessageQuery, SendMessageBody, ModifyMessageBody, BatchModifyMessagesBody, GetThreadQuery, ModifyThreadBody, CreateDraftBody, UpdateDraftBody, CreateLabelBody, UpdateLabelBody } from "./gmail.modals.js";
 export declare class GmailController {
     private getTenant;
-    private static readonly WORKFLOW_EVENTS;
     runWorkflow: (req: Request<{
         workflowId: string;
     }>, res: Response, next: NextFunction) => Promise<Response<any, Record<string, any>> | undefined>;

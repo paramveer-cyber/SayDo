@@ -1,1 +1,1 @@
-{"version":3,"file":"corsair-tenant.d.ts","sourceRoot":"","sources":["../../../../src/common/utils/corsair-tenant.ts"],"names":[],"mappings":"AAuCA,eAAO,MAAM,gBAAgB,GAAI,QAAQ,MAAM;;;;CAe9C,CAAC;AAEF,eAAO,MAAM,oBAAoB,GAAI,QAAQ,MAAM,KAAG,IAErD,CAAC"}
+{"version":3,"file":"corsair-tenant.d.ts","sourceRoot":"","sources":["../../../../src/common/utils/corsair-tenant.ts"],"names":[],"mappings":"AA6CA,eAAO,MAAM,gBAAgB,GAAI,QAAQ,MAAM;;;;CAe9C,CAAC;AAEF,eAAO,MAAM,oBAAoB,GAAI,QAAQ,MAAM,KAAG,IAErD,CAAC"}

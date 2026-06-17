@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Lenis from "lenis";
 
 type TosSection = {
   marker: string;
@@ -101,8 +103,8 @@ const tosSections: TosSection[] = [
       <>
         <p>
           Anything you input into SayDo is yours. If you want it deleted, email
-          us (address in the footer) and we'll handle it promptly. We won't
-          make you fill out a 12-step form to exercise a right you already have.
+          us (address in the footer) and we'll handle it promptly. We won't make
+          you fill out a 12-step form to exercise a right you already have.
         </p>
         <p>
           That said — don't sue us if a server crashes and something disappears.
@@ -126,8 +128,8 @@ const tosSections: TosSection[] = [
         </p>
         <p>
           Since this is a private dashboard, you are solely responsible for the
-          data you bring in. We're just the vessel. A very efficient,
-          AI-powered vessel.
+          data you bring in. We're just the vessel. A very efficient, AI-powered
+          vessel.
         </p>
       </>
     ),
@@ -141,9 +143,8 @@ const tosSections: TosSection[] = [
         <p>
           SayDo is not intended for children under 13. By authenticating via
           Google OAuth and using this service, you confirm you are at least 13
-          years old. If you are under 13, please go outside and touch some
-          grass — the inbox will still be there when you're older, and it'll be
-          worse.
+          years old. If you are under 13, please go outside and touch some grass
+          — the inbox will still be there when you're older, and it'll be worse.
         </p>
       </>
     ),
@@ -188,6 +189,19 @@ function DotGrid() {
 export default function TermsPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.075, smoothWheel: true });
+    const onFrame = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(onFrame);
+    };
+    const rafId = requestAnimationFrame(onFrame);
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -229,8 +243,16 @@ export default function TermsPage() {
             cursor: "pointer",
             fontFamily: "inherit",
             padding: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
           }}
         >
+          <img
+            src="/icon.png"
+            alt="Corsair"
+            style={{ width: 28, height: 28, objectFit: "cover" }}
+          />
           SayDo
         </button>
         <div style={{ display: "flex", gap: "2rem" }}>
@@ -253,9 +275,7 @@ export default function TermsPage() {
                 fontFamily: "inherit",
                 transition: "color 0.15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--fg)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
               onMouseLeave={(e) =>
                 (e.currentTarget.style.color = "var(--fg-dim)")
               }
@@ -412,9 +432,7 @@ export default function TermsPage() {
           </span>
           <div style={{ display: "flex", gap: "0.4rem" }}>
             <div style={{ width: 6, height: 6, background: "var(--red)" }} />
-            <div
-              style={{ width: 6, height: 6, background: "var(--yellow)" }}
-            />
+            <div style={{ width: 6, height: 6, background: "var(--yellow)" }} />
             <div style={{ width: 6, height: 6, background: "var(--blue)" }} />
           </div>
         </div>

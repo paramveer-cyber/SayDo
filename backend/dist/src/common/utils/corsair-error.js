@@ -11,7 +11,9 @@ const isRateLimitedError = (error) => {
 };
 export const isUnauthorizedFromUpstream = (error) => error.status === 401;
 export const isTokenRefreshFailure = (error) => /failed to (obtain valid|refresh) access token/i.test(error.message);
+const isDelegationDenied = (error) => /delegation denied/i.test(error.message);
 export const isRecoverableAuthHiccup = (error) => error instanceof Error &&
+    !isDelegationDenied(error) &&
     (isTokenRefreshFailure(error) || isUnauthorizedFromUpstream(error));
 export const mapCorsairError = (error) => {
     if (!(error instanceof Error))
@@ -23,7 +25,10 @@ export const mapCorsairError = (error) => {
     if (isRateLimitedError(error)) {
         return ApiError.tooManyRequests("Rate limited by the connected service. Please try again shortly.");
     }
-    if (isTokenRefreshFailure(error) || isUnauthorizedFromUpstream(error)) {
+    if (isTokenRefreshFailure(error)) {
+        return ApiError.internal("Failed to refresh access token. Please try again.");
+    }
+    if (isUnauthorizedFromUpstream(error)) {
         return ApiError.unAuthorized("Connected account's access has expired. Please reconnect it.");
     }
     return null;

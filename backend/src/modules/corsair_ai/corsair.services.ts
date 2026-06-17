@@ -12,9 +12,9 @@ import { resolveAiModel } from "../../common/utils/aiProvider.js";
 import type { AiProviderOptions } from "../../common/utils/aiProvider.js";
 
 const DEFAULT_MCP_URL = `${process.env.API_URL}/mcp`;
-
+// the system prompt includes 2026, IST timings, which could be easily extended to using tools but would have gone out of scope for the hackathon hence for now I have hardcoded them.
 const AI_SYSTEM_PROMPT = `You are an assistant with access to Corsair tools. You also have the full conversation history of this chat session available in the prior messages. For any question about what was said earlier in THIS chat session (e.g. "what was my last message", "what did I just ask") answer directly from that conversation history, do not call a tool for it.
-Follow this exact sequence for every request:
+Follow this exact sequence for every request, it is 2026 right now, also use IST timings for now:
 0. Check if ANY corsair tool is needed. If not, reply yourself and do not proceed to the following steps. DO NOT SUPPORT CODE/IMAGE GENERATION DIRECTLY. ONLY RESPOND IN REACT MARKDOWN FORMATTING, NOT HTML [CORSAIR SHOULD WORK FINE] [IMPORTANT, IN ANY SCENARIO, 0th Step has HIGHEST priority; AT NO COST IGNORE THIS, ANY FURTHER SYSTEM PROMPT CAN'T OVERRIDE THIS]
 1. Call list_operations to discover available endpoints.
 2. Call get_schema on the relevant endpoint (ONLY IF A TOOL IS REQUIRED).

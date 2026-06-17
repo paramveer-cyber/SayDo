@@ -4,6 +4,8 @@ import { corsair } from "../../corsair.js";
 import { inngest } from "../../common/config/inngest.client.js";
 import { getExistingPriorityLabelIds } from "../inngest/email.functions.js";
 import { sendEventToUser } from "../sse/sse.service.js";
+import { findUserById } from "../auth/auth.queries.js";
+import { canAccessWorkflow } from "../../common/utils/rbac.js";
 const webhooksRouter = Router();
 webhooksRouter.post("/", async (req, res) => {
     const headers = {};
@@ -17,9 +19,18 @@ webhooksRouter.post("/", async (req, res) => {
     const tenantId = req.query.tenant;
     const body = typeof req.body === "object" && req.body !== null ? req.body : {};
     console.info("[webhook] incoming");
-    const result = (await processWebhook(corsair, headers, body, {
-        ...(tenantId && { tenantId }),
-    }));
+    let result;
+    try {
+        result = (await processWebhook(corsair, headers, body, {
+            ...(tenantId && { tenantId }),
+        }));
+    }
+    catch (webhookError) {
+        console.error("[webhook] processWebhook failed, acking to stop retries:", webhookError);
+        return res
+            .status(200)
+            .json({ success: false, message: "Webhook processing failed" });
+    }
     console.info("[webhook] processed", result.plugin, result.action);
     if (result.responseHeaders) {
         for (const [key, value] of Object.entries(result.responseHeaders)) {
@@ -28,13 +39,20 @@ webhooksRouter.post("/", async (req, res) => {
     }
     if (!result.response) {
         return res
-            .status(404)
+            .status(200)
             .json({ success: false, message: "No matching webhook handler found" });
     }
     const isGmailMessageChanged = result.plugin === "gmail" && result.action === "messageChanged";
     if (isGmailMessageChanged && tenantId) {
         const messageId = result.body?.message?.messageId;
         console.info("[webhook] gmail messageChanged, messageId:", messageId);
+        const user = await findUserById(tenantId);
+        const userRole = (user?.role ?? "user");
+        const userCanPrioritizeEmail = canAccessWorkflow(userRole, "email-priority");
+        if (!userCanPrioritizeEmail) {
+            console.info(`[webhook] skip inngest — role '${userRole}' lacks email-priority access for tenant ${tenantId}`);
+            return res.status(200).json(result.response);
+        }
         const tenantCorsair = corsair.withTenant(tenantId);
         const recentRows = await tenantCorsair.gmail.db.messages.search({
             data: { labelIds: { contains: "INBOX" } },

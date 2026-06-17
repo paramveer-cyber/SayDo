@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import RazorpayCheckoutButton from "../../components/RazorpayCheckoutButton";
+import Lenis from "lenis";
 
 type PricingFeature = {
   label: string;
@@ -59,7 +61,8 @@ const pricingTiers: PricingTier[] = [
     accentColor: "#cd7f32",
     ctaLabel: "Get Bronze",
     targetRole: "bronze_subscriber",
-    clipStyle: "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
+    clipStyle:
+      "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
     features: [
       { label: "Gmail access", included: true },
       { label: "Google Calendar access", included: true },
@@ -154,8 +157,24 @@ function CheckMark({ color }: { color: string }) {
 function CrossMark() {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-      <line x1="1" y1="1" x2="9" y2="9" stroke="var(--border-strong)" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="9" y1="1" x2="1" y2="9" stroke="var(--border-strong)" strokeWidth="1.5" strokeLinecap="round" />
+      <line
+        x1="1"
+        y1="1"
+        x2="9"
+        y2="9"
+        stroke="var(--border-strong)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="9"
+        y1="1"
+        x2="1"
+        y2="9"
+        stroke="var(--border-strong)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -172,6 +191,19 @@ export default function PricingPage() {
 
   const currentRole = auth.status === "authenticated" ? auth.user.role : null;
   const isAuthenticated = auth.status === "authenticated";
+
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.075, smoothWheel: true });
+    const onFrame = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(onFrame);
+    };
+    const rafId = requestAnimationFrame(onFrame);
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
 
   async function handlePaymentSuccess(newRole: string) {
     if (auth.status === "authenticated") {
@@ -221,8 +253,16 @@ export default function PricingPage() {
             cursor: "pointer",
             fontFamily: "inherit",
             padding: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
           }}
         >
+          <img
+            src="/icon.png"
+            alt="Corsair"
+            style={{ width: 28, height: 28, objectFit: "cover" }}
+          />
           SayDo
         </button>
         <div style={{ display: "flex", gap: "2rem" }}>
@@ -246,7 +286,9 @@ export default function PricingPage() {
                 transition: "color 0.15s",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-dim)")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--fg-dim)")
+              }
             >
               {link.label}
             </button>
@@ -306,8 +348,9 @@ export default function PricingPage() {
               margin: 0,
             }}
           >
-            Start free. Upgrade when the limits start hurting. We run on the free tier of everything,
-            so prompt limits are real — but if you bring your own Gemini API key, those limits don't apply.
+            Start free. Upgrade when the limits start hurting. We run on the
+            free tier of everything, so prompt limits are real — but if you
+            bring your own Gemini API key, those limits don't apply.
           </p>
         </div>
 
@@ -335,7 +378,9 @@ export default function PricingPage() {
               }}
             >
               <span>✓</span>
-              <span>Active plan: {roleDisplayName[currentRole] ?? currentRole}</span>
+              <span>
+                Active plan: {roleDisplayName[currentRole] ?? currentRole}
+              </span>
             </div>
           </div>
         )}
@@ -352,11 +397,16 @@ export default function PricingPage() {
           }}
         >
           {pricingTiers.map((tier) => {
-            const cardBackground = tier.inverted ? "var(--fg)" : "var(--surface)";
+            const cardBackground = tier.inverted
+              ? "var(--fg)"
+              : "var(--surface)";
             const cardFg = tier.inverted ? "var(--bg)" : "var(--fg)";
-            const cardFgDim = tier.inverted ? "rgba(15,15,15,0.55)" : "var(--fg-dim)";
+            const cardFgDim = tier.inverted
+              ? "rgba(15,15,15,0.55)"
+              : "var(--fg-dim)";
             const isCurrentPlan = currentRole === tier.targetRole;
-            const isFreeAndOnFree = tier.amountInPaise === null && currentRole === "user";
+            const isFreeAndOnFree =
+              tier.amountInPaise === null && currentRole === "user";
 
             return (
               <div
@@ -366,8 +416,8 @@ export default function PricingPage() {
                   border: tier.inverted
                     ? "none"
                     : isCurrentPlan || isFreeAndOnFree
-                    ? `1px solid ${tier.accentColor === "var(--border-strong)" ? "var(--border-strong)" : tier.accentColor}`
-                    : "1px solid var(--border)",
+                      ? `1px solid ${tier.accentColor === "var(--border-strong)" ? "var(--border-strong)" : tier.accentColor}`
+                      : "1px solid var(--border)",
                   padding: "2rem 1.75rem 1.75rem",
                   display: "flex",
                   flexDirection: "column",
@@ -385,8 +435,14 @@ export default function PricingPage() {
                       fontWeight: 800,
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
-                      color: tier.inverted ? "var(--bg)" : tier.accentColor === "var(--border-strong)" ? "var(--fg-dim)" : tier.accentColor,
-                      background: tier.inverted ? "rgba(15,15,15,0.1)" : "var(--bg)",
+                      color: tier.inverted
+                        ? "var(--bg)"
+                        : tier.accentColor === "var(--border-strong)"
+                          ? "var(--fg-dim)"
+                          : tier.accentColor,
+                      background: tier.inverted
+                        ? "rgba(15,15,15,0.1)"
+                        : "var(--bg)",
                       padding: "2px 6px",
                       border: `1px solid ${tier.accentColor === "var(--border-strong)" ? "var(--border)" : tier.accentColor}`,
                     }}
@@ -436,7 +492,9 @@ export default function PricingPage() {
                 <div
                   style={{
                     height: 1,
-                    background: tier.inverted ? "rgba(15,15,15,0.15)" : "var(--border)",
+                    background: tier.inverted
+                      ? "rgba(15,15,15,0.15)"
+                      : "var(--border)",
                     marginBottom: "1.25rem",
                   }}
                 />
@@ -482,8 +540,8 @@ export default function PricingPage() {
                               tier.inverted
                                 ? "var(--bg)"
                                 : tier.accentColor === "var(--border-strong)"
-                                ? "var(--fg)"
-                                : tier.accentColor
+                                  ? "var(--fg)"
+                                  : tier.accentColor
                             }
                           />
                         ) : (
@@ -511,9 +569,12 @@ export default function PricingPage() {
                       fontFamily: "inherit",
                       width: "100%",
                       transition: "opacity 0.15s",
-                      clipPath: "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
+                      clipPath:
+                        "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.opacity = "0.8")
+                    }
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                   >
                     {tier.ctaLabel}
@@ -531,7 +592,8 @@ export default function PricingPage() {
                         color: "var(--green)",
                         border: "1px solid var(--green)",
                         textAlign: "center",
-                        clipPath: "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
+                        clipPath:
+                          "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
                       }}
                     >
                       ✓ Current plan
@@ -566,9 +628,12 @@ export default function PricingPage() {
                       fontFamily: "inherit",
                       width: "100%",
                       transition: "opacity 0.15s",
-                      clipPath: "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
+                      clipPath:
+                        "polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.opacity = "0.8")
+                    }
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                   >
                     Sign in to upgrade
@@ -608,9 +673,10 @@ export default function PricingPage() {
                 margin: 0,
               }}
             >
-              You can add your own Gemini API key in settings. When active, your key is used directly
-              for all AI requests — prompt limits don't apply. You're billed by Google at their standard
-              rates; we don't touch that.
+              You can add your own Gemini API key in settings. When active, your
+              key is used directly for all AI requests — prompt limits don't
+              apply. You're billed by Google at their standard rates; we don't
+              touch that.
             </p>
           </div>
 
@@ -659,12 +725,12 @@ export default function PricingPage() {
                   maxWidth: 480,
                 }}
               >
-                Higher limits, custom workflows, or something that doesn't fit a tier — reach out.
-                No sales deck, just a conversation.
+                Higher limits, custom workflows, or something that doesn't fit a
+                tier — reach out. No sales deck, just a conversation.
               </p>
             </div>
             <a
-              href="mailto:hello@saydo.app"
+              href="mailto:piscesparamveer@gmail.com"
               style={{
                 fontSize: "0.7rem",
                 fontWeight: 800,
@@ -677,7 +743,8 @@ export default function PricingPage() {
                 cursor: "pointer",
                 fontFamily: "inherit",
                 whiteSpace: "nowrap",
-                clipPath: "polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px))",
+                clipPath:
+                  "polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px))",
                 textDecoration: "none",
                 display: "inline-block",
               }}
@@ -686,7 +753,12 @@ export default function PricingPage() {
             </a>
           </div>
 
-          <div style={{ padding: "1.5rem 0 6rem", borderTop: "1px solid var(--border)" }}>
+          <div
+            style={{
+              padding: "1.5rem 0 6rem",
+              borderTop: "1px solid var(--border)",
+            }}
+          >
             <p
               style={{
                 fontSize: "0.65rem",
@@ -696,8 +768,12 @@ export default function PricingPage() {
                 maxWidth: 680,
               }}
             >
-              Plans give you access to features, not a guarantee of uptime. We run lean and do our best — see the{" "}
-              <a href="/tos" style={{ color: "var(--fg-dim)", textDecoration: "underline" }}>
+              Plans give you access to features, not a guarantee of uptime. We
+              run lean and do our best — see the{" "}
+              <a
+                href="/tos"
+                style={{ color: "var(--fg-dim)", textDecoration: "underline" }}
+              >
                 terms
               </a>{" "}
               for the full picture.

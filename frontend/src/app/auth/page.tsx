@@ -24,9 +24,32 @@ function GeoDoodle() {
         pointerEvents: "none",
       }}
     >
-      <rect x="10" y="10" width="60" height="60" stroke="var(--blue)" strokeWidth="2" transform="rotate(15 40 40)" fill="none" />
-      <circle cx="90" cy="30" r="20" stroke="var(--red)" strokeWidth="2" fill="var(--red-dim)" />
-      <line x1="0" y1="100" x2="100" y2="0" stroke="var(--yellow)" strokeWidth="1.5" />
+      <rect
+        x="10"
+        y="10"
+        width="60"
+        height="60"
+        stroke="var(--blue)"
+        strokeWidth="2"
+        transform="rotate(15 40 40)"
+        fill="none"
+      />
+      <circle
+        cx="90"
+        cy="30"
+        r="20"
+        stroke="var(--red)"
+        strokeWidth="2"
+        fill="var(--red-dim)"
+      />
+      <line
+        x1="0"
+        y1="100"
+        x2="100"
+        y2="0"
+        stroke="var(--yellow)"
+        strokeWidth="1.5"
+      />
       <circle cx="20" cy="95" r="4" fill="var(--green)" />
     </svg>
   );
@@ -46,7 +69,11 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (auth.status === "authenticated") {
-      router.replace(allPluginsConnected(auth.user.plugins) ? "/dashboard" : "/dashboard/connect");
+      router.replace(
+        allPluginsConnected(auth.user.plugins)
+          ? "/dashboard"
+          : "/dashboard/connect",
+      );
     }
   }, [auth, router]);
 
@@ -102,14 +129,22 @@ export default function AuthPage() {
         >
           <GeoDoodle />
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div className="nb-logo-mark" style={{ width: 36, height: 36 }}>
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                <path d="M3 13L8 3L13 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M5 9.5H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+          >
+            <div
+              className="nb-logo-mark"
+              style={{ width: 36, height: 36, overflow: "hidden" }}
+            >
+              <img
+                src="/icon.png"
+                alt="Corsair"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
-            <span className="nb-wordmark" style={{ fontSize: "1.1rem" }}>Corsair</span>
+            <span className="nb-wordmark" style={{ fontSize: "1.1rem" }}>
+              Corsair
+            </span>
           </div>
 
           <div>
@@ -125,17 +160,32 @@ export default function AuthPage() {
             >
               {mode === "login" ? "Welcome back" : "Join Corsair"}
             </h1>
-            <p style={{ fontSize: "0.8rem", color: "var(--fg-dim)", letterSpacing: "0.02em" }}>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--fg-dim)",
+                letterSpacing: "0.02em",
+              }}
+            >
               {mode === "login" ? "Sign in to continue" : "Create your account"}
             </p>
           </div>
 
           <GoogleLogin
             onSuccess={({ credential }) => {
-              if (!credential) { setError("Google sign-in failed"); return; }
+              if (!credential) {
+                setError("Google sign-in failed");
+                return;
+              }
               setLoading(true);
               googleLogin(credential)
-                .catch((err) => setError(err instanceof Error ? err.message : "Google sign-in failed"))
+                .catch((err) =>
+                  setError(
+                    err instanceof Error
+                      ? err.message
+                      : "Google sign-in failed",
+                  ),
+                )
                 .finally(() => setLoading(false));
             }}
             onError={() => setError("Google sign-in failed")}
@@ -143,13 +193,26 @@ export default function AuthPage() {
             width="356"
           />
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+          >
             <div style={{ flex: 1, height: 2, background: "var(--border)" }} />
-            <span style={{ fontSize: "0.65rem", color: "var(--fg-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>or</span>
+            <span
+              style={{
+                fontSize: "0.65rem",
+                color: "var(--fg-dim)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+              }}
+            >
+              or
+            </span>
             <div style={{ flex: 1, height: 2, background: "var(--border)" }} />
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+          >
             {mode === "register" && (
               <input
                 type="text"
@@ -193,14 +256,33 @@ export default function AuthPage() {
             </p>
           )}
 
-          <button className="nb-btn-primary nb-shine" onClick={handleSubmit} disabled={loading} style={{ width: "100%" }}>
-            {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
+          <button
+            className="nb-btn-primary nb-shine"
+            onClick={handleSubmit}
+            disabled={loading}
+            style={{ width: "100%" }}
+          >
+            {loading
+              ? "Please wait…"
+              : mode === "login"
+                ? "Sign in"
+                : "Create account"}
           </button>
 
-          <p style={{ fontSize: "0.78rem", color: "var(--fg-dim)", textAlign: "center", margin: 0 }}>
+          <p
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--fg-dim)",
+              textAlign: "center",
+              margin: 0,
+            }}
+          >
             {mode === "login" ? "No account? " : "Have an account? "}
             <button
-              onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError("");
+              }}
               style={{
                 background: "none",
                 border: "none",

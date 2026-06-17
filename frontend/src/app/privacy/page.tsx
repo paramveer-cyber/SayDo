@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Lenis from "lenis";
 
 type PrivacySection = {
   marker: string;
@@ -70,7 +72,7 @@ const privacySections: PrivacySection[] = [
         <p>
           We don't use your email content to train AI models. We don't share
           your behavior with ad networks. We don't do any of the things that
-          make you feel gross about using software in 2025. That behavior is
+          make you feel gross about using software in 2026. That behavior is
           exactly the frustration that led us to build this in the first place.
         </p>
       </>
@@ -191,6 +193,19 @@ function DotGrid() {
 export default function PrivacyPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.075, smoothWheel: true });
+    const onFrame = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(onFrame);
+    };
+    const rafId = requestAnimationFrame(onFrame);
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -232,8 +247,16 @@ export default function PrivacyPage() {
             cursor: "pointer",
             fontFamily: "inherit",
             padding: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
           }}
         >
+          <img
+            src="/icon.png"
+            alt="Corsair"
+            style={{ width: 28, height: 28, objectFit: "cover" }}
+          />
           SayDo
         </button>
         <div style={{ display: "flex", gap: "2rem" }}>
@@ -324,7 +347,7 @@ export default function PrivacyPage() {
           >
             We respect your privacy. We built this because we were tired of
             products that didn't. Here's exactly what we do and don't do with
-            your data. Last updated June 2025.
+            your data. Last updated June 2026.
           </p>
         </div>
 
@@ -402,7 +425,7 @@ export default function PrivacyPage() {
               fontWeight: 600,
             }}
           >
-            SayDo · Privacy Policy · Last updated June 2025
+            SayDo · Privacy Policy · Last updated June 2026
           </span>
           <div style={{ display: "flex", gap: "0.4rem" }}>
             <div style={{ width: 6, height: 6, background: "var(--blue)" }} />
