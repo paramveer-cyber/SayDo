@@ -635,7 +635,8 @@ export default function CalendarSection() {
                   <div
                     key={idx}
                     style={{
-                      minHeight: 80,
+                      height: 90,
+                      overflow: "hidden",
                       padding: "0.3rem",
                       borderRadius: 6,
                       border: "1px solid var(--border)",

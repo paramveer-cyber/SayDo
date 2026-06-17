@@ -2,12 +2,38 @@
 
 import { useState } from "react";
 import { gmailApi } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
 
 type WorkflowId =
   | "weekly-digest"
   | "daily-digest"
   | "unsubscribe-suggestions"
   | "followup-scan";
+
+type UserRole =
+  | "user"
+  | "bronze_subscriber"
+  | "silver_subscriber"
+  | "gold_subscriber"
+  | "admin";
+
+const ROLE_RANK: Record<UserRole, number> = {
+  user: 0,
+  bronze_subscriber: 1,
+  silver_subscriber: 2,
+  gold_subscriber: 3,
+  admin: 99,
+};
+
+const WORKFLOW_MINIMUM_ROLE: Record<WorkflowId, UserRole> = {
+  "weekly-digest": "bronze_subscriber",
+  "daily-digest": "silver_subscriber",
+  "unsubscribe-suggestions": "silver_subscriber",
+  "followup-scan": "silver_subscriber",
+};
+
+const canAccessWorkflow = (role: UserRole, workflowId: WorkflowId): boolean =>
+  ROLE_RANK[role] >= ROLE_RANK[WORKFLOW_MINIMUM_ROLE[workflowId]];
 
 const WORKFLOWS: { id: WorkflowId; label: string; description: string }[] = [
   {
@@ -35,6 +61,10 @@ const WORKFLOWS: { id: WorkflowId; label: string; description: string }[] = [
 ];
 
 export default function WorkflowButtons() {
+  const auth = useAuth();
+  const userRole: UserRole =
+    auth.status === "authenticated" ? (auth.user.role as UserRole) : "user";
+
   const [runningId, setRunningId] = useState<WorkflowId | null>(null);
   const [message, setMessage] = useState<{
     id: WorkflowId;
@@ -84,53 +114,67 @@ export default function WorkflowButtons() {
         Workflows
       </h3>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-        {WORKFLOWS.map((workflow) => (
-          <div
-            key={workflow.id}
-            className="nb-card"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-              padding: "0.85rem 1rem",
-              minWidth: 220,
-              flex: "1 1 220px",
-            }}
-          >
-            <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>
-              {workflow.label}
-            </div>
+        {WORKFLOWS.map((workflow) => {
+          const hasAccess = canAccessWorkflow(userRole, workflow.id);
+          const requiredRole = WORKFLOW_MINIMUM_ROLE[workflow.id].replace(
+            /_/g,
+            " ",
+          );
+
+          return (
             <div
+              key={workflow.id}
+              className="nb-card"
               style={{
-                fontSize: "0.75rem",
-                color: "var(--fg-dim)",
-                lineHeight: 1.4,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+                padding: "0.85rem 1rem",
+                minWidth: 220,
+                flex: "1 1 220px",
+                opacity: hasAccess ? 1 : 0.55,
               }}
             >
-              {workflow.description}
-            </div>
-            <button
-              onClick={() => handleRun(workflow.id)}
-              disabled={runningId === workflow.id}
-              className="nb-btn-primary"
-              style={{ alignSelf: "flex-start", marginTop: "0.25rem" }}
-            >
-              {runningId === workflow.id ? "Triggering…" : "Run"}
-            </button>
-            {message?.id === workflow.id && (
+              <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                {workflow.label}
+              </div>
               <div
                 style={{
-                  fontSize: "0.72rem",
-                  color: message.isError
-                    ? "var(--error)"
-                    : "var(--accent-text)",
+                  fontSize: "0.75rem",
+                  color: "var(--fg-dim)",
+                  lineHeight: 1.4,
                 }}
               >
-                {message.text}
+                {hasAccess ? workflow.description : `Requires ${requiredRole}`}
               </div>
-            )}
-          </div>
-        ))}
+              <button
+                onClick={() => handleRun(workflow.id)}
+                disabled={!hasAccess || runningId === workflow.id}
+                className="nb-btn-primary"
+                style={{
+                  alignSelf: "flex-start",
+                  marginTop: "0.25rem",
+                  opacity: !hasAccess ? 0.4 : 1,
+                  cursor: !hasAccess ? "not-allowed" : "pointer",
+                }}
+              >
+                {runningId === workflow.id ? "Triggering…" : "Run"}
+              </button>
+              {message?.id === workflow.id && (
+                <div
+                  style={{
+                    fontSize: "0.72rem",
+                    color: message.isError
+                      ? "var(--error)"
+                      : "var(--accent-text)",
+                  }}
+                >
+                  {message.text}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

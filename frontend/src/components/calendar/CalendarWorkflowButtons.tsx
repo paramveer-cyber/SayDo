@@ -2,8 +2,37 @@
 
 import { useState } from "react";
 import { gmailApi } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
 
 type CalWorkflowId = "week-prep-briefing" | "conflict-detector";
+
+type UserRole =
+  | "user"
+  | "bronze_subscriber"
+  | "silver_subscriber"
+  | "gold_subscriber"
+  | "admin";
+
+const ROLE_RANK: Record<UserRole, number> = {
+  user: 0,
+  bronze_subscriber: 1,
+  silver_subscriber: 2,
+  gold_subscriber: 3,
+  admin: 99,
+};
+
+const WORKFLOW_MINIMUM_ROLE: Record<CalWorkflowId, UserRole> = {
+  "week-prep-briefing": "bronze_subscriber",
+  "conflict-detector": "silver_subscriber",
+};
+
+const roleAtLeast = (role: UserRole, minimum: UserRole): boolean =>
+  ROLE_RANK[role] >= ROLE_RANK[minimum];
+
+const canAccessWorkflow = (
+  role: UserRole,
+  workflowId: CalWorkflowId,
+): boolean => roleAtLeast(role, WORKFLOW_MINIMUM_ROLE[workflowId]);
 
 const WORKFLOWS: {
   id: CalWorkflowId;
@@ -28,6 +57,10 @@ const WORKFLOWS: {
 ];
 
 export default function CalendarWorkflowButtons() {
+  const auth = useAuth();
+  const userRole: UserRole =
+    auth.status === "authenticated" ? (auth.user.role as UserRole) : "user";
+
   const [runningId, setRunningId] = useState<CalWorkflowId | null>(null);
   const [doneId, setDoneId] = useState<CalWorkflowId | null>(null);
   const [errorId, setErrorId] = useState<CalWorkflowId | null>(null);
@@ -78,6 +111,11 @@ export default function CalendarWorkflowButtons() {
         const isRunning = runningId === workflow.id;
         const isDone = doneId === workflow.id;
         const isError = errorId === workflow.id;
+        const hasAccess = canAccessWorkflow(userRole, workflow.id);
+        const requiredRole = WORKFLOW_MINIMUM_ROLE[workflow.id].replace(
+          /_/g,
+          " ",
+        );
 
         return (
           <div
@@ -98,6 +136,7 @@ export default function CalendarWorkflowButtons() {
               transition: "border-color 0.2s, box-shadow 0.2s",
               flex: "1 1 240px",
               maxWidth: 360,
+              opacity: hasAccess ? 1 : 0.5,
             }}
           >
             <span style={{ fontSize: "1rem", flexShrink: 0 }}>
@@ -122,7 +161,7 @@ export default function CalendarWorkflowButtons() {
                   marginTop: 2,
                 }}
               >
-                {workflow.description}
+                {hasAccess ? workflow.description : `Requires ${requiredRole}`}
               </div>
             </div>
             <div
@@ -136,9 +175,14 @@ export default function CalendarWorkflowButtons() {
             >
               <button
                 onClick={() => handleRun(workflow.id)}
-                disabled={isRunning || runningId !== null}
+                disabled={!hasAccess || isRunning || runningId !== null}
                 className="nb-btn-primary"
-                style={{ padding: "0.45rem 0.875rem", fontSize: "0.72rem" }}
+                style={{
+                  padding: "0.45rem 0.875rem",
+                  fontSize: "0.72rem",
+                  opacity: !hasAccess ? 0.4 : 1,
+                  cursor: !hasAccess ? "not-allowed" : "pointer",
+                }}
               >
                 {isRunning ? "…" : "Run"}
               </button>
