@@ -1,6 +1,5 @@
 import type { LanguageModel } from "ai";
 export interface AiProviderOptions {
-    useLocalModel?: boolean;
     preferredModel?: string;
     geminiApiKey?: string | null;
 }

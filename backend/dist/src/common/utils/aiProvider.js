@@ -1,10 +1,6 @@
 import { google, createGoogleGenerativeAI } from "@ai-sdk/google";
-import { ollama } from "ai-sdk-ollama";
 const DEFAULT_MODEL = "gemini-flash-lite-latest";
 export const resolveAiModel = (options) => {
-    if (options.useLocalModel) {
-        return ollama("gemma4");
-    }
     const modelName = options.preferredModel ?? DEFAULT_MODEL;
     if (options.geminiApiKey) {
         const customProvider = createGoogleGenerativeAI({

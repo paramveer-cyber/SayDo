@@ -56,6 +56,7 @@ export declare const findUserByRefreshToken: (token: string) => Promise<{
     createdAt: Date;
 } | null>;
 export declare const insertUser: (data: typeof users.$inferInsert) => Promise<{
+    password: string | null;
     provider: "local" | "google";
     role: "user" | "bronze_subscriber" | "silver_subscriber" | "gold_subscriber" | "admin";
     id: string;
@@ -63,7 +64,6 @@ export declare const insertUser: (data: typeof users.$inferInsert) => Promise<{
     email: string;
     avatarUrl: string | null;
     salt: string | null;
-    password: string | null;
     providerId: string | null;
     refreshToken: string | null;
     plugins: Record<string, boolean>;
