@@ -414,7 +414,7 @@ export const gmailApi = {
       | "unsubscribe-suggestions"
       | "followup-scan"
       | "week-prep-briefing"
-      | "conflict-detector",
+      | "conflict-detection",
   ) =>
     request<null>(`/gmail/workflows/${workflowId}/run`, {
       method: "POST",

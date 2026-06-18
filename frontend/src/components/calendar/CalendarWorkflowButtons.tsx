@@ -4,7 +4,7 @@ import { useState } from "react";
 import { gmailApi } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
-type CalWorkflowId = "week-prep-briefing" | "conflict-detector";
+type CalWorkflowId = "week-prep-briefing" | "conflict-detection";
 
 type UserRole =
   | "user"
@@ -23,7 +23,7 @@ const ROLE_RANK: Record<UserRole, number> = {
 
 const WORKFLOW_MINIMUM_ROLE: Record<CalWorkflowId, UserRole> = {
   "week-prep-briefing": "bronze_subscriber",
-  "conflict-detector": "silver_subscriber",
+  "conflict-detection": "silver_subscriber",
 };
 
 const roleAtLeast = (role: UserRole, minimum: UserRole): boolean =>
@@ -48,7 +48,7 @@ const WORKFLOWS: {
     icon: "📅",
   },
   {
-    id: "conflict-detector",
+    id: "conflict-detection",
     label: "Conflict detector",
     description:
       "Find overlapping events and tight transitions in the week ahead — sent to your inbox",

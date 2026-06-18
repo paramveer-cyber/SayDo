@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { gmailApi } from "../../../../lib/api";
 import gsap from "gsap";
 
-type CalWorkflowId = "week-prep-briefing" | "conflict-detector";
+type CalWorkflowId = "week-prep-briefing" | "conflict-detection";
 
 const WORKFLOWS: {
   id: CalWorkflowId;
@@ -64,7 +64,7 @@ const WORKFLOWS: {
     ),
   },
   {
-    id: "conflict-detector",
+    id: "conflict-detection",
     label: "Conflict detector",
     description:
       "Find overlapping events and tight transitions in the week ahead",
