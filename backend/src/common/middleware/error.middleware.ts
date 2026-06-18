@@ -25,27 +25,21 @@ const errorHandler = (
   if (typeof err === "object" && err !== null && "code" in err) {
     const dbError = err as { code: string };
     if (dbError.code === "23505") {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "A record with that value already exists",
-        });
+      return res.status(409).json({
+        success: false,
+        message: "A record with that value already exists",
+      });
     }
     if (dbError.code === "23503") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Invalid reference — related record does not exist",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reference — related record does not exist",
+      });
     }
   }
 
-  console.error(
-    "[Unhandled Error]",
-    util.inspect(err, { depth: null, colors: false }),
-  );
+  // prodn log
+  console.error("unhandled error:", util.inspect(err, { depth: 3 }));
 
   return res
     .status(500)

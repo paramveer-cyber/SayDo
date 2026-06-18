@@ -196,14 +196,7 @@ export const batchModifyMessages = async (
 
   await Promise.all(
     fields.ids.map((messageId) =>
-      tenantCorsair.gmail.api.messages
-        .get({ id: messageId })
-        .catch((err: Error) =>
-          console.warn(
-            `Failed to refresh cached message ${messageId} after batch modify:`,
-            err,
-          ),
-        ),
+      tenantCorsair.gmail.api.messages.get({ id: messageId }).catch(() => {}),
     ),
   );
 };
@@ -421,8 +414,6 @@ export const syncAllMessages = async (
   tenantCorsair: TenantCorsair,
   query: SyncMessagesQuery,
 ): Promise<SyncMessagesResult> => {
-  console.log("Syncing messages...", query);
-
   const maxResults = toNumber(query.maxResults, 10);
   const maxPages = toNumber(query.maxPages, 2);
   const fetchFull =
@@ -443,7 +434,6 @@ export const syncAllMessages = async (
       ...(labelIds !== undefined && { labelIds }),
       ...(pageToken !== undefined && { pageToken }),
     });
-    console.log(`API threadids: ${listResult} , page: ${pagesFetched}`);
 
     for (const message of listResult.messages ?? []) {
       if (message.id) messageIds.push(message.id);
@@ -462,7 +452,6 @@ export const syncAllMessages = async (
 
   for (let i = 0; i < messageIds.length; i += batchSize) {
     const batch = messageIds.slice(i, i + batchSize);
-    console.log("BATCH: ", i);
     await Promise.all(
       batch.map((id) =>
         tenantCorsair.gmail.api.messages.get({ id, format: "metadata" }),
@@ -470,6 +459,11 @@ export const syncAllMessages = async (
     );
     syncedInFull += batch.length;
   }
+
+  // prodn log
+  console.log(
+    `gmail sync done: total=${messageIds.length} synced=${syncedInFull} pages=${pagesFetched}`,
+  );
 
   return { totalMessages: messageIds.length, syncedInFull, pagesFetched };
 };
@@ -509,9 +503,8 @@ const ensureGmailPubSubSubscription = async (
   );
 
   if (createResponse.ok) {
-    console.info(
-      `[pubsub] subscription created for tenant=${tenantId} endpoint=${pushEndpoint}`,
-    );
+    // prodn log
+    console.info(`pubsub subscription created: tenant=${tenantId}`);
     return;
   }
 
@@ -538,9 +531,8 @@ const ensureGmailPubSubSubscription = async (
     throw new Error(`Pub/Sub push endpoint update failed: ${err}`);
   }
 
-  console.info(
-    `[pubsub] subscription already existed, push endpoint updated for tenant=${tenantId} endpoint=${pushEndpoint}`,
-  );
+  // prodn log
+  console.info(`pubsub subscription push endpoint updated: tenant=${tenantId}`);
 };
 
 export const setupGmailWatch = async (
@@ -572,9 +564,8 @@ export const setupGmailWatch = async (
     throw new Error(`Gmail watch setup failed: ${err}`);
   }
 
-  console.info(
-    `[pubsub] gmail watch active for tenant=${tenantId} topic=${topicName}`,
-  );
+  // prodn log
+  console.info(`gmail watch active: tenant=${tenantId}`);
 };
 
 const deleteGmailPubSubSubscription = async (
@@ -584,8 +575,6 @@ const deleteGmailPubSubSubscription = async (
   const projectId = parseProjectFromTopicName(topicName);
   const subscriptionName = `projects/${projectId}/subscriptions/gmail-watch-${tenantId}`;
   const accessToken = await getPubSubAccessToken();
-
-  console.info(`[pubsub] deleting subscription: ${subscriptionName}`);
 
   const response = await fetch(
     `https://pubsub.googleapis.com/v1/${subscriptionName}`,
@@ -600,9 +589,8 @@ const deleteGmailPubSubSubscription = async (
     throw new Error(`Pub/Sub subscription delete failed: ${err}`);
   }
 
-  console.info(
-    `[pubsub] subscription deleted for tenant=${tenantId} (status=${response.status})`,
-  );
+  // prodn log
+  console.info(`pubsub subscription deleted: tenant=${tenantId}`);
 };
 
 export const stopGmailWatch = async (
@@ -625,21 +613,13 @@ export const stopGmailWatch = async (
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error(
-        `Gmail watch stop failed for tenant=${tenantId}: ${errorBody}`,
-      );
-    } else {
-      console.info(`[pubsub] gmail watch stopped for tenant=${tenantId}`);
+      // prodn log
+      console.error(`gmail watch stop failed: tenant=${tenantId}`, errorBody);
     }
   } catch (err) {
-    console.error(
-      `Gmail watch stop call threw for tenant=${tenantId}, proceeding to remove subscription anyway:`,
-      err,
-    );
+    // prodn log
+    console.error(`gmail watch stop threw: tenant=${tenantId}`, err);
   }
 
-  console.info(
-    `[pubsub] calling deleteGmailPubSubSubscription for tenant=${tenantId}`,
-  );
   await deleteGmailPubSubSubscription(tenantId);
 };

@@ -245,7 +245,8 @@ export const oauthCallback = async (
         try {
           await stopGmailWatch(tenantCorsair, result.tenantId);
         } catch (err) {
-          console.error("Gmail watch teardown on reconnect failed:", err);
+          // prodn log
+          console.error("gmail watch teardown failed:", err);
         }
 
         await db
@@ -263,15 +264,15 @@ export const oauthCallback = async (
 
       const freshTenantCorsair = getTenantCorsair(result.tenantId);
 
-      syncAllMessages(freshTenantCorsair, {}).catch((err) =>
-        console.error("Gmail backfill sync failed:", err),
-      );
+      syncAllMessages(freshTenantCorsair, {}).catch((err) => {
+        // prodn log
+        console.error("gmail backfill sync failed:", err);
+      });
 
-      setupGmailWatch(freshTenantCorsair, result.tenantId)
-        .then((data) => {
-          console.log("Gmail watch setup done", data);
-        })
-        .catch((err) => console.error("Gmail watch setup failed:", err));
+      setupGmailWatch(freshTenantCorsair, result.tenantId).catch((err) => {
+        // prodn log
+        console.error("gmail watch setup failed:", err);
+      });
     }
 
     const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3001";
@@ -301,7 +302,8 @@ export const disconnectPlugin = async (
       try {
         await stopGmailWatch(tenantCorsair, userId);
       } catch (err) {
-        console.error("Gmail watch teardown failed:", err);
+        // prodn log
+        console.error("gmail watch teardown failed:", err);
       }
     }
 

@@ -111,9 +111,7 @@ export const batchModifyMessages = async (tenantCorsair, fields) => {
             removeLabelIds: fields.removeLabelIds,
         }),
     });
-    await Promise.all(fields.ids.map((messageId) => tenantCorsair.gmail.api.messages
-        .get({ id: messageId })
-        .catch((err) => console.warn(`Failed to refresh cached message ${messageId} after batch modify:`, err))));
+    await Promise.all(fields.ids.map((messageId) => tenantCorsair.gmail.api.messages.get({ id: messageId }).catch(() => { })));
 };
 export const listThreads = async (tenantCorsair, query) => {
     const limit = toNumber(query.maxResults, 100);
@@ -248,7 +246,6 @@ export const updateLabel = (tenantCorsair, labelId, fields) => tenantCorsair.gma
     },
 });
 export const syncAllMessages = async (tenantCorsair, query) => {
-    console.log("Syncing messages...", query);
     const maxResults = toNumber(query.maxResults, 10);
     const maxPages = toNumber(query.maxPages, 2);
     const fetchFull = query.fetchFull === undefined ||
@@ -266,7 +263,6 @@ export const syncAllMessages = async (tenantCorsair, query) => {
             ...(labelIds !== undefined && { labelIds }),
             ...(pageToken !== undefined && { pageToken }),
         });
-        console.log(`API threadids: ${listResult} , page: ${pagesFetched}`);
         for (const message of listResult.messages ?? []) {
             if (message.id)
                 messageIds.push(message.id);
@@ -281,10 +277,11 @@ export const syncAllMessages = async (tenantCorsair, query) => {
     let syncedInFull = 0;
     for (let i = 0; i < messageIds.length; i += batchSize) {
         const batch = messageIds.slice(i, i + batchSize);
-        console.log("BATCH: ", i);
         await Promise.all(batch.map((id) => tenantCorsair.gmail.api.messages.get({ id, format: "metadata" })));
         syncedInFull += batch.length;
     }
+    // prodn log
+    console.log(`gmail sync done: total=${messageIds.length} synced=${syncedInFull} pages=${pagesFetched}`);
     return { totalMessages: messageIds.length, syncedInFull, pagesFetched };
 };
 const parseProjectFromTopicName = (topicName) => {
@@ -312,7 +309,8 @@ const ensureGmailPubSubSubscription = async (tenantId) => {
         }),
     });
     if (createResponse.ok) {
-        console.info(`[pubsub] subscription created for tenant=${tenantId} endpoint=${pushEndpoint}`);
+        // prodn log
+        console.info(`pubsub subscription created: tenant=${tenantId}`);
         return;
     }
     const alreadyExists = createResponse.status === 409;
@@ -332,7 +330,8 @@ const ensureGmailPubSubSubscription = async (tenantId) => {
         const err = await modifyResponse.text();
         throw new Error(`Pub/Sub push endpoint update failed: ${err}`);
     }
-    console.info(`[pubsub] subscription already existed, push endpoint updated for tenant=${tenantId} endpoint=${pushEndpoint}`);
+    // prodn log
+    console.info(`pubsub subscription push endpoint updated: tenant=${tenantId}`);
 };
 export const setupGmailWatch = async (tenantCorsair, tenantId) => {
     await ensureGmailPubSubSubscription(tenantId);
@@ -353,14 +352,14 @@ export const setupGmailWatch = async (tenantCorsair, tenantId) => {
         const err = await response.text();
         throw new Error(`Gmail watch setup failed: ${err}`);
     }
-    console.info(`[pubsub] gmail watch active for tenant=${tenantId} topic=${topicName}`);
+    // prodn log
+    console.info(`gmail watch active: tenant=${tenantId}`);
 };
 const deleteGmailPubSubSubscription = async (tenantId) => {
     const topicName = process.env.GMAIL_PUBSUB_TOPIC;
     const projectId = parseProjectFromTopicName(topicName);
     const subscriptionName = `projects/${projectId}/subscriptions/gmail-watch-${tenantId}`;
     const accessToken = await getPubSubAccessToken();
-    console.info(`[pubsub] deleting subscription: ${subscriptionName}`);
     const response = await fetch(`https://pubsub.googleapis.com/v1/${subscriptionName}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -369,7 +368,8 @@ const deleteGmailPubSubSubscription = async (tenantId) => {
         const err = await response.text();
         throw new Error(`Pub/Sub subscription delete failed: ${err}`);
     }
-    console.info(`[pubsub] subscription deleted for tenant=${tenantId} (status=${response.status})`);
+    // prodn log
+    console.info(`pubsub subscription deleted: tenant=${tenantId}`);
 };
 export const stopGmailWatch = async (tenantCorsair, tenantId) => {
     try {
@@ -383,16 +383,14 @@ export const stopGmailWatch = async (tenantCorsair, tenantId) => {
         });
         if (!response.ok) {
             const errorBody = await response.text();
-            console.error(`Gmail watch stop failed for tenant=${tenantId}: ${errorBody}`);
-        }
-        else {
-            console.info(`[pubsub] gmail watch stopped for tenant=${tenantId}`);
+            // prodn log
+            console.error(`gmail watch stop failed: tenant=${tenantId}`, errorBody);
         }
     }
     catch (err) {
-        console.error(`Gmail watch stop call threw for tenant=${tenantId}, proceeding to remove subscription anyway:`, err);
+        // prodn log
+        console.error(`gmail watch stop threw: tenant=${tenantId}`, err);
     }
-    console.info(`[pubsub] calling deleteGmailPubSubSubscription for tenant=${tenantId}`);
     await deleteGmailPubSubSubscription(tenantId);
 };
 //# sourceMappingURL=gmail.services.js.map

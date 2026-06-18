@@ -28,24 +28,18 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
   const body =
     typeof req.body === "object" && req.body !== null ? req.body : {};
 
-  console.info("[webhook] incoming");
-
   let result: WebhookProcessedResult;
   try {
     result = (await processWebhook(corsair, headers, body, {
       ...(tenantId && { tenantId }),
     })) as WebhookProcessedResult;
   } catch (webhookError) {
-    console.error(
-      "[webhook] processWebhook failed, acking to stop retries:",
-      webhookError,
-    );
+    // prodn log
+    console.error("webhook processing failed:", webhookError);
     return res
       .status(200)
       .json({ success: false, message: "Webhook processing failed" });
   }
-
-  console.info("[webhook] processed", result.plugin, result.action);
 
   if (result.responseHeaders) {
     for (const [key, value] of Object.entries(result.responseHeaders)) {
@@ -63,10 +57,6 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
     result.plugin === "gmail" && result.action === "messageChanged";
 
   if (isGmailMessageChanged && tenantId) {
-    const messageId = result.body?.message?.messageId;
-
-    console.info("[webhook] gmail messageChanged, messageId:", messageId);
-
     const user = await findUserById(tenantId);
     const userRole = (user?.role ?? "user") as UserRole;
     const userCanPrioritizeEmail = canAccessWorkflow(
@@ -75,9 +65,6 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
     );
 
     if (!userCanPrioritizeEmail) {
-      console.info(
-        `[webhook] skip inngest — role '${userRole}' lacks email-priority access for tenant ${tenantId}`,
-      );
       return res.status(200).json(result.response);
     }
 
@@ -107,34 +94,31 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
       );
 
       if (alreadyPrioritized) {
-        console.info(
-          `[webhook] skip — already prioritized: ${newestMessage.id} (${newestMessage.subject})`,
-        );
-      } else {
-        console.info(
-          `[webhook] prioritizing newest message: ${newestMessage.id} (${newestMessage.subject})`,
-        );
+        return res.status(200).json(result.response);
+      }
 
-        sendEventToUser(tenantId, "new_email", {
+      // prodn log
+      console.info(`email priority job dispatched: ${newestMessage.id}`);
+
+      sendEventToUser(tenantId, "new_email", {
+        messageId: newestMessage.id ?? "",
+        from: newestMessage.from ?? "",
+        subject: newestMessage.subject ?? "",
+        snippet: newestMessage.snippet ?? "",
+      });
+
+      await inngest.send({
+        name: "email/received",
+        data: {
           messageId: newestMessage.id ?? "",
+          tenantId,
           from: newestMessage.from ?? "",
           subject: newestMessage.subject ?? "",
           snippet: newestMessage.snippet ?? "",
-        });
-
-        await inngest.send({
-          name: "email/received",
-          data: {
-            messageId: newestMessage.id ?? "",
-            tenantId,
-            from: newestMessage.from ?? "",
-            subject: newestMessage.subject ?? "",
-            snippet: newestMessage.snippet ?? "",
-            body: newestMessage.body ?? "",
-            labelIds: newestMessage.labelIds ?? [],
-          },
-        });
-      }
+          body: newestMessage.body ?? "",
+          labelIds: newestMessage.labelIds ?? [],
+        },
+      });
     }
   }
 
