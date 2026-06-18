@@ -10,6 +10,25 @@ type SidebarVariant = "main" | "gmail" | "calendar";
 
 const mainNavItems = [
   {
+    id: "chat",
+    label: "Chat",
+    href: "/dashboard/chat",
+    exact: false,
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M14 10.667A1.333 1.333 0 0 1 12.667 12H4L1.333 14.667V3.333A1.333 1.333 0 0 1 2.667 2h10A1.333 1.333 0 0 1 14 3.333v7.334z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
     id: "command-center",
     label: "Command Center",
     href: "/dashboard",
@@ -29,25 +48,6 @@ const mainNavItems = [
         />
         <path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5" />
         <path d="M6.5 6.5V14.5" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-    ),
-  },
-  {
-    id: "chat",
-    label: "Chat",
-    href: "/dashboard/chat",
-    exact: false,
-    color: "var(--yellow)",
-    colorDim: "var(--yellow-dim)",
-    icon: (
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path
-          d="M14 10.667A1.333 1.333 0 0 1 12.667 12H4L1.333 14.667V3.333A1.333 1.333 0 0 1 2.667 2h10A1.333 1.333 0 0 1 14 3.333v7.334z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
       </svg>
     ),
   },
@@ -397,11 +397,6 @@ export default function Sidebar({ variant }: { variant: SidebarVariant }) {
 
   useEffect(() => {
     if (!sidebarRef.current) return;
-    gsap.fromTo(
-      sidebarRef.current,
-      { x: -20, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.55, ease: "power4.out" },
-    );
   }, []);
 
   return (
