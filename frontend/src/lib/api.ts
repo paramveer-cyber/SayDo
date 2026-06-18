@@ -105,7 +105,6 @@ export interface UserSettings {
   userId: string;
   geminiApiKey: string | null;
   preferredModel: string;
-  useLocalModel: boolean;
   approvalsRequired: boolean;
   promptsAsked: number;
   systemPromptOverride: string | null;
@@ -117,7 +116,6 @@ export interface UserSettings {
 export type UpdateSettingsBody = Partial<{
   geminiApiKey: string | null;
   preferredModel: string;
-  useLocalModel: boolean;
   approvalsRequired: boolean;
   systemPromptOverride: string | null;
   keybinds: KeybindsMap;
@@ -136,8 +134,8 @@ export const settingsApi = {
 export const aiApi = {
   prompt: async (body: {
     prompt: string;
-    useLocalModal: boolean;
     mcpServer?: string;
+    requestId?: string;
     options?: {
       history?: string[];
     };
@@ -592,4 +590,63 @@ export const paymentApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+};
+
+export interface EmailNeedingAttention {
+  messageId: string;
+  threadId?: string;
+  from: string;
+  subject: string;
+  snippet: string;
+  internalDate: string | null;
+  isHighPriority: boolean;
+}
+
+export interface MeetingToday {
+  eventId: string;
+  summary: string;
+  location?: string;
+  htmlLink?: string;
+  start?: { dateTime?: string; date?: string; timeZone?: string };
+  end?: { dateTime?: string; date?: string; timeZone?: string };
+  attendeeCount: number;
+}
+
+export interface ConflictDetected {
+  eventAId: string;
+  eventASummary: string;
+  eventBId: string;
+  eventBSummary: string;
+  overlapStart: string;
+  overlapEnd: string;
+}
+
+export interface FollowUpDue {
+  messageId: string;
+  threadId: string;
+  to: string;
+  subject: string;
+  snippet: string;
+  sentAt: string | null;
+  daysSinceSent: number;
+}
+
+export interface CommandCenterOverview {
+  emailsNeedingAttention: EmailNeedingAttention[];
+  meetingsToday: MeetingToday[];
+  conflictsDetected: ConflictDetected[];
+  followUpsDue: FollowUpDue[];
+  generatedAt: string;
+}
+
+export const commandCenterApi = {
+  getOverview: (timeMin?: string, timeMax?: string) => {
+    const searchParams = new URLSearchParams();
+    if (timeMin) searchParams.set("timeMin", timeMin);
+    if (timeMax) searchParams.set("timeMax", timeMax);
+    const qs = searchParams.toString();
+    return rawRequest<CommandCenterOverview>(
+      `/command-center/overview${qs ? `?${qs}` : ""}`,
+    );
+  },
 };

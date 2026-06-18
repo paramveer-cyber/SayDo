@@ -15,7 +15,7 @@ export function useAiPrompt() {
     setAiLoading(true);
     setAiResult(null);
     try {
-      const result = await aiApi.prompt({ prompt: text, useLocalModal: false });
+      const result = await aiApi.prompt({ prompt: text });
       setAiResult(result ?? "Done.");
     } catch {
       setAiResult("AI request failed.");

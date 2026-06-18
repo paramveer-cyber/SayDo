@@ -3,13 +3,13 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import ChatSection from "../../components/ChatSection";
+import CommandCenterSection from "../../components/CommandCenterSection";
 import Sidebar from "../../components/Sidebar";
 import LoadingScreen from "../../components/LoadingScreen";
 import { allPluginsConnected } from "../../lib/plugins";
 import gsap from "gsap";
 
-export default function Home() {
+export default function CommandCenterPage() {
   const auth = useAuth();
   const { status } = auth;
   const router = useRouter();
@@ -83,7 +83,7 @@ export default function Home() {
             overflow: "hidden",
           }}
         >
-          <ChatSection />
+          <CommandCenterSection />
         </div>
       </main>
     </div>

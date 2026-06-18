@@ -33,6 +33,13 @@ export const KEYBIND_ACTIONS: KeybindAction[] = [
     default: { key: "l", ctrl: true, shift: true },
   },
   {
+    id: "nav-command-center",
+    label: "Go to Command Center",
+    description: "Open the Command Center overview",
+    category: "Navigation",
+    default: { key: "0", ctrl: true },
+  },
+  {
     id: "nav-chat",
     label: "Go to Chat",
     description: "Open the AI chat",

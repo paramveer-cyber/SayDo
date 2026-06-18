@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { validate } from "../../common/middleware/validate.js";
-import { authMiddleware } from "../auth/auth.middleware.js";
+import { validate, validateQuery } from "../../common/middleware/validate.js";
 import { GmailController } from "./gmail.controller.js";
 import {
   sendMessageBody,
@@ -11,14 +10,19 @@ import {
   updateDraftBody,
   createLabelBody,
   updateLabelBody,
+  listMessagesQuery,
+  listThreadsQuery,
+  listDraftsQuery,
 } from "./gmail.modals.js";
 
 const gmailController = new GmailController();
 const gmailRouter = Router();
 
-gmailRouter.use(authMiddleware);
-
-gmailRouter.get("/messages", gmailController.listMessages);
+gmailRouter.get(
+  "/messages",
+  validateQuery(listMessagesQuery),
+  gmailController.listMessages,
+);
 gmailRouter.post("/messages/sync", gmailController.syncMessages);
 gmailRouter.post("/workflows/:workflowId/run", gmailController.runWorkflow);
 gmailRouter.post(
@@ -44,7 +48,11 @@ gmailRouter.patch(
   gmailController.modifyMessage,
 );
 
-gmailRouter.get("/threads", gmailController.listThreads);
+gmailRouter.get(
+  "/threads",
+  validateQuery(listThreadsQuery),
+  gmailController.listThreads,
+);
 gmailRouter.get("/threads/:threadId", gmailController.getThread);
 gmailRouter.patch(
   "/threads/:threadId",
@@ -55,7 +63,11 @@ gmailRouter.post("/threads/:threadId/trash", gmailController.trashThread);
 gmailRouter.post("/threads/:threadId/untrash", gmailController.untrashThread);
 gmailRouter.delete("/threads/:threadId", gmailController.deleteThread);
 
-gmailRouter.get("/drafts", gmailController.listDrafts);
+gmailRouter.get(
+  "/drafts",
+  validateQuery(listDraftsQuery),
+  gmailController.listDrafts,
+);
 gmailRouter.get("/drafts/:draftId", gmailController.getDraft);
 gmailRouter.post(
   "/drafts",

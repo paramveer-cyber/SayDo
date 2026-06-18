@@ -10,11 +10,35 @@ type SidebarVariant = "main" | "gmail" | "calendar";
 
 const mainNavItems = [
   {
-    id: "chat",
-    label: "Chat",
+    id: "command-center",
+    label: "Command Center",
     href: "/dashboard",
+    exact: true,
     color: "var(--green)",
     colorDim: "var(--green-dim)",
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="1.5"
+          y="1.5"
+          width="13"
+          height="13"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M6.5 6.5V14.5" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+    ),
+  },
+  {
+    id: "chat",
+    label: "Chat",
+    href: "/dashboard/chat",
+    exact: false,
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
     icon: (
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
         <path
@@ -31,6 +55,7 @@ const mainNavItems = [
     id: "gmail",
     label: "Gmail",
     href: "/dashboard/gmail",
+    exact: false,
     color: "var(--red)",
     colorDim: "var(--red-dim)",
     icon: (
@@ -57,6 +82,7 @@ const mainNavItems = [
     id: "calendar",
     label: "Calendar",
     href: "/dashboard/calendar",
+    exact: false,
     color: "var(--blue)",
     colorDim: "var(--blue-dim)",
     icon: (
@@ -87,6 +113,7 @@ const mainNavItems = [
     id: "profile",
     label: "Profile",
     href: "/profile",
+    exact: false,
     color: "var(--yellow)",
     colorDim: "var(--yellow-dim)",
     icon: (
@@ -111,6 +138,7 @@ const mainNavItems = [
     id: "settings",
     label: "Settings",
     href: "/dashboard/settings",
+    exact: false,
     color: "var(--border-strong)",
     colorDim: "var(--surface)",
     icon: (
@@ -435,11 +463,7 @@ export default function Sidebar({ variant }: { variant: SidebarVariant }) {
               Navigate
             </div>
             {mainNavItems.map((item) => {
-              const isActive = isPathActive(
-                pathname,
-                item.href,
-                item.href === "/dashboard",
-              );
+              const isActive = isPathActive(pathname, item.href, item.exact);
               return (
                 <NavButton
                   key={item.id}

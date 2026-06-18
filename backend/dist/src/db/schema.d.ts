@@ -301,23 +301,6 @@ export declare const userSettings: import("drizzle-orm/pg-core").PgTableWithColu
         }, {}, {
             length: 100;
         }>;
-        useLocalModel: import("drizzle-orm/pg-core").PgColumn<{
-            name: "use_local_model";
-            tableName: "user_settings";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
         approvalsRequired: import("drizzle-orm/pg-core").PgColumn<{
             name: "approvals_required";
             tableName: "user_settings";

@@ -56,7 +56,6 @@ export declare const findUserByRefreshToken: (token: string) => Promise<{
     createdAt: Date;
 } | null>;
 export declare const insertUser: (data: typeof users.$inferInsert) => Promise<{
-    password: string | null;
     provider: "local" | "google";
     role: "user" | "bronze_subscriber" | "silver_subscriber" | "gold_subscriber" | "admin";
     id: string;
@@ -64,6 +63,7 @@ export declare const insertUser: (data: typeof users.$inferInsert) => Promise<{
     email: string;
     avatarUrl: string | null;
     salt: string | null;
+    password: string | null;
     providerId: string | null;
     refreshToken: string | null;
     plugins: Record<string, boolean>;
@@ -529,7 +529,6 @@ export declare const findSettingsByUserId: (userId: string) => Promise<{
     userId: string;
     geminiApiKey: string | null;
     preferredModel: string;
-    useLocalModel: boolean;
     approvalsRequired: boolean;
     promptsAsked: number;
     systemPromptOverride: string | null;
@@ -543,7 +542,6 @@ export declare const createDefaultSettings: (userId: string) => Promise<{
     userId: string;
     geminiApiKey: string | null;
     preferredModel: string;
-    useLocalModel: boolean;
     approvalsRequired: boolean;
     promptsAsked: number;
     systemPromptOverride: string | null;
@@ -555,7 +553,6 @@ export declare const updateSettings: (userId: string, data: Partial<Omit<typeof 
     userId: string;
     geminiApiKey: string | null;
     preferredModel: string;
-    useLocalModel: boolean;
     approvalsRequired: boolean;
     promptsAsked: number;
     systemPromptOverride: string | null;
@@ -637,23 +634,6 @@ export declare const incrementPromptsAsked: (userId: string) => Omit<import("dri
         }, {}, {
             length: 100;
         }>;
-        useLocalModel: import("drizzle-orm/pg-core").PgColumn<{
-            name: "use_local_model";
-            tableName: "user_settings";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
         approvalsRequired: import("drizzle-orm/pg-core").PgColumn<{
             name: "approvals_required";
             tableName: "user_settings";

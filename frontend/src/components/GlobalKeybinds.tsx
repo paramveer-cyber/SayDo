@@ -27,7 +27,8 @@ export function dispatchKeybindAction(actionId: string) {
 }
 
 const NAV_TARGETS: Record<string, string> = {
-  "nav-chat": "/dashboard",
+  "nav-command-center": "/dashboard",
+  "nav-chat": "/dashboard/chat",
   "nav-gmail": "/dashboard/gmail",
   "nav-calendar": "/dashboard/calendar",
   "nav-settings": "/dashboard/settings",

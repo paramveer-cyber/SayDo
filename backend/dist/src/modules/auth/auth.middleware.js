@@ -15,15 +15,16 @@ export const authMiddleware = async (req, res, next) => {
         const token = authHeader.split(" ")[1];
         try {
             const decoded = verifyToken(token);
-            req.user = decoded.userId;
             const user = await findUserById(decoded.userId);
             if (!user)
                 return next(ApiError.unAuthorized("User not found"));
+            req.user = user.id;
             req.userRole = user.role;
             return next();
         }
-        catch (err) {
-            if (!(err instanceof Error) || err.name !== "TokenExpiredError") {
+        catch (tokenError) {
+            if (!(tokenError instanceof Error) ||
+                tokenError.name !== "TokenExpiredError") {
                 return next(ApiError.unAuthorized("Invalid token"));
             }
             const refreshToken = req.cookies?.refreshToken;

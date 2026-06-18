@@ -14,7 +14,7 @@ export const roleAtLeast = (role: UserRole, minimum: UserRole): boolean =>
   ROLE_RANK[role] >= ROLE_RANK[minimum];
 
 export const PROMPT_LIMITS: Record<UserRole, number> = {
-  user: 10,
+  user: 5,
   bronze_subscriber: 50,
   silver_subscriber: 200,
   gold_subscriber: 1000,
@@ -33,7 +33,7 @@ export type WorkflowId =
   | "bulk-prioritize-week";
 
 const WORKFLOW_MINIMUM_ROLE: Record<WorkflowId, UserRole> = {
-  "email-priority": "bronze_subscriber",
+  "email-priority": "user",
   "weekly-digest": "bronze_subscriber",
   "daily-digest": "silver_subscriber",
   "unsubscribe-suggestions": "silver_subscriber",

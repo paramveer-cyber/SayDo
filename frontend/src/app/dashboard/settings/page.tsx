@@ -99,7 +99,6 @@ export default function SettingsPage() {
   const [preferredModel, setPreferredModel] = useState(
     "gemini-flash-lite-latest",
   );
-  const [useLocalModel, setUseLocalModel] = useState(false);
   const [approvalsRequired, setApprovalsRequired] = useState(false);
   const [systemPromptOverride, setSystemPromptOverride] = useState("");
   const [keybinds, setKeybinds] = useState<KeybindsMap>(mergeKeybinds(null));
@@ -135,7 +134,6 @@ export default function SettingsPage() {
         setSettings(settings);
         setGeminiApiKey(settings.geminiApiKey ?? "");
         setPreferredModel(settings.preferredModel);
-        setUseLocalModel(settings.useLocalModel);
         setApprovalsRequired(settings.approvalsRequired);
         setSystemPromptOverride(settings.systemPromptOverride ?? "");
         setKeybinds(mergeKeybinds(settings.keybinds));
@@ -174,7 +172,6 @@ export default function SettingsPage() {
       const { settings: updated } = await settingsApi.update({
         geminiApiKey: geminiApiKey.trim() === "" ? null : geminiApiKey.trim(),
         preferredModel: preferredModel.trim(),
-        useLocalModel,
         approvalsRequired,
         systemPromptOverride:
           systemPromptOverride.trim() === "" ? null : systemPromptOverride,
@@ -339,13 +336,6 @@ export default function SettingsPage() {
                   gemini-flash-lite-latest, gemini-2.5-flash).
                 </p>
               </div>
-
-              <Toggle
-                checked={useLocalModel}
-                onChange={setUseLocalModel}
-                label="Use local model"
-                description="Run AI prompts against a local Ollama model instead of Gemini."
-              />
 
               <Toggle
                 checked={approvalsRequired}

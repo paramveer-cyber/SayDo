@@ -14,6 +14,31 @@ type NewEmailPayload = {
   snippet: string;
 };
 
+export const AGENT_STEP_EVENT = "corsair:agent-step";
+
+export type AgentToolCallSummary = {
+  toolName: string;
+  label: string;
+};
+
+export type AgentStepEventDetail =
+  | { kind: "started"; requestId: string }
+  | {
+      kind: "step";
+      requestId: string;
+      stepNumber: number;
+      toolCalls: AgentToolCallSummary[];
+      toolResultCount: number;
+      hasText: boolean;
+    }
+  | { kind: "done"; requestId: string };
+
+const dispatchAgentStepEvent = (detail: AgentStepEventDetail) => {
+  window.dispatchEvent(
+    new CustomEvent<AgentStepEventDetail>(AGENT_STEP_EVENT, { detail }),
+  );
+};
+
 export default function SseListener() {
   const auth = useAuth();
   const { push } = useToast();
@@ -37,6 +62,31 @@ export default function SseListener() {
         title: payload.subject || "New email",
         message: payload.from,
       });
+    });
+
+    source.addEventListener("agent_started", (event) => {
+      const payload = JSON.parse((event as MessageEvent).data) as {
+        requestId: string;
+      };
+      dispatchAgentStepEvent({ kind: "started", requestId: payload.requestId });
+    });
+
+    source.addEventListener("agent_step", (event) => {
+      const payload = JSON.parse((event as MessageEvent).data) as {
+        requestId: string;
+        stepNumber: number;
+        toolCalls: AgentToolCallSummary[];
+        toolResultCount: number;
+        hasText: boolean;
+      };
+      dispatchAgentStepEvent({ kind: "step", ...payload });
+    });
+
+    source.addEventListener("agent_done", (event) => {
+      const payload = JSON.parse((event as MessageEvent).data) as {
+        requestId: string;
+      };
+      dispatchAgentStepEvent({ kind: "done", requestId: payload.requestId });
     });
 
     return () => source.close();

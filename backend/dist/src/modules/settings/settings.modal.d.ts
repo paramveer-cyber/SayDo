@@ -9,7 +9,6 @@ declare const KeyComboSchema: z.ZodObject<{
 export declare const UpdateSettingsSchema: z.ZodObject<{
     geminiApiKey: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     preferredModel: z.ZodOptional<z.ZodString>;
-    useLocalModel: z.ZodOptional<z.ZodBoolean>;
     approvalsRequired: z.ZodOptional<z.ZodBoolean>;
     systemPromptOverride: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     keybinds: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodObject<{

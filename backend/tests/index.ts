@@ -10,6 +10,9 @@ const suites = [
   "calendar.test.ts",
   "ai.test.ts",
   "webhooks.test.ts",
+  "settings.test.ts",
+  "command-center.test.ts",
+  "razorpay.test.ts",
 ];
 
 console.log("=== Running all test suites ===\n");
@@ -17,14 +20,10 @@ console.log("=== Running all test suites ===\n");
 let anyFailed = false;
 
 for (const suite of suites) {
-  const result = spawnSync(
-    "npx",
-    ["tsx", resolve(directory, suite)],
-    {
-      stdio: "inherit",
-      env: process.env,
-    },
-  );
+  const result = spawnSync("npx", ["tsx", resolve(directory, suite)], {
+    stdio: "inherit",
+    env: process.env,
+  });
   if (result.status !== 0) anyFailed = true;
 }
 

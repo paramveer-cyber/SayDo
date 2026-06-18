@@ -20,8 +20,8 @@ export declare const sendMessageBody: z.ZodObject<{
     subject: z.ZodString;
     body: z.ZodString;
     threadId: z.ZodOptional<z.ZodString>;
-    cc: z.ZodOptional<z.ZodString>;
-    bcc: z.ZodOptional<z.ZodString>;
+    cc: z.ZodOptional<z.ZodEmail>;
+    bcc: z.ZodOptional<z.ZodEmail>;
 }, z.core.$strip>;
 export declare const modifyMessageBody: z.ZodObject<{
     addLabelIds: z.ZodOptional<z.ZodArray<z.ZodString>>;
@@ -80,18 +80,6 @@ export declare const createLabelBody: z.ZodObject<{
         labelHide: "labelHide";
     }>>;
 }, z.core.$strip>;
-export type ListMessagesQuery = z.infer<typeof listMessagesQuery>;
-export type GetMessageQuery = z.infer<typeof getMessageQuery>;
-export type SendMessageBody = z.infer<typeof sendMessageBody>;
-export type ModifyMessageBody = z.infer<typeof modifyMessageBody>;
-export type BatchModifyMessagesBody = z.infer<typeof batchModifyMessagesBody>;
-export type ListThreadsQuery = z.infer<typeof listThreadsQuery>;
-export type GetThreadQuery = z.infer<typeof getThreadQuery>;
-export type ModifyThreadBody = z.infer<typeof modifyThreadBody>;
-export type ListDraftsQuery = z.infer<typeof listDraftsQuery>;
-export type CreateDraftBody = z.infer<typeof createDraftBody>;
-export type UpdateDraftBody = z.infer<typeof updateDraftBody>;
-export type CreateLabelBody = z.infer<typeof createLabelBody>;
 export declare const updateLabelBody: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     messageListVisibility: z.ZodOptional<z.ZodEnum<{
@@ -104,5 +92,17 @@ export declare const updateLabelBody: z.ZodObject<{
         labelHide: "labelHide";
     }>>;
 }, z.core.$strip>;
+export type ListMessagesQuery = z.infer<typeof listMessagesQuery>;
+export type GetMessageQuery = z.infer<typeof getMessageQuery>;
+export type SendMessageBody = z.infer<typeof sendMessageBody>;
+export type ModifyMessageBody = z.infer<typeof modifyMessageBody>;
+export type BatchModifyMessagesBody = z.infer<typeof batchModifyMessagesBody>;
+export type ListThreadsQuery = z.infer<typeof listThreadsQuery>;
+export type GetThreadQuery = z.infer<typeof getThreadQuery>;
+export type ModifyThreadBody = z.infer<typeof modifyThreadBody>;
+export type ListDraftsQuery = z.infer<typeof listDraftsQuery>;
+export type CreateDraftBody = z.infer<typeof createDraftBody>;
+export type UpdateDraftBody = z.infer<typeof updateDraftBody>;
+export type CreateLabelBody = z.infer<typeof createLabelBody>;
 export type UpdateLabelBody = z.infer<typeof updateLabelBody>;
 //# sourceMappingURL=gmail.modals.d.ts.map

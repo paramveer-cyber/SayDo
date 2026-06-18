@@ -45,13 +45,13 @@ export const onEmailReceivedAssignPriority = inngest.createFunction({
     await step.run("check-workflow-access", () => assertTenantWorkflowAccess(tenantId, "email-priority"));
     const classificationResult = await step.run("classify-email-priority-with-ai", async () => {
         const model = await resolveModelForTenant(tenantId);
-        const emailContext = `
+        const emailContext = `<untrusted_email_data>
 From: ${from}
 Subject: ${subject}
 Snippet: ${snippet}
 Label IDs: ${labelIds.join(", ")}
 Body (first 1000 chars): ${body?.slice(0, 1000) ?? ""}
-`.trim();
+</untrusted_email_data>`;
         const { text } = await generateText({
             model,
             system: EMAIL_PRIORITY_CLASSIFIER_SYSTEM_PROMPT,
@@ -172,7 +172,7 @@ export const onWeeklyDigestRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: WEEKLY_DIGEST_SYSTEM_PROMPT,
-            prompt: `Here are the emails from the last 7 days as JSON:\n\n${JSON.stringify(trimmed)}`,
+            prompt: `Here are the emails from the last 7 days as JSON:\n\n<untrusted_email_data>\n${JSON.stringify(trimmed)}\n</untrusted_email_data>`,
         });
         return text.trim();
     });
@@ -204,7 +204,7 @@ export const onDailyDigestRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: DAILY_DIGEST_SYSTEM_PROMPT,
-            prompt: `Here are the emails from the last 24 hours as JSON:\n\n${JSON.stringify(trimmed)}`,
+            prompt: `Here are the emails from the last 24 hours as JSON:\n\n<untrusted_email_data>\n${JSON.stringify(trimmed)}\n</untrusted_email_data>`,
         });
         return text.trim();
     });
@@ -259,7 +259,7 @@ export const onUnsubscribeSuggestionsRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: UNSUBSCRIBE_SUGGESTIONS_SYSTEM_PROMPT,
-            prompt: `Here are the recurring senders from the last 30 days as JSON:\n\n${JSON.stringify(candidates)}`,
+            prompt: `Here are the recurring senders from the last 30 days as JSON:\n\n<untrusted_email_data>\n${JSON.stringify(candidates)}\n</untrusted_email_data>`,
         });
         return text.trim();
     });
@@ -305,7 +305,7 @@ export const onFollowupScanRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: FOLLOWUP_SCANNER_SYSTEM_PROMPT,
-            prompt: `Here are the sent emails from the last 14 days:\n\n${JSON.stringify(trimmed)}`,
+            prompt: `Here are the sent emails from the last 14 days:\n\n<untrusted_email_data>\n${JSON.stringify(trimmed)}\n</untrusted_email_data>`,
         });
         return text.trim();
     });
@@ -353,7 +353,7 @@ export const onBulkCleanupRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: BULK_CLEANUP_SYSTEM_PROMPT,
-            prompt: `Total emails reviewed: ${messages.length}\n\nFrequent senders (3+ emails):\n${JSON.stringify(senderGroups)}`,
+            prompt: `Total emails reviewed: ${messages.length}\n\nFrequent senders (3+ emails):\n<untrusted_email_data>\n${JSON.stringify(senderGroups)}\n</untrusted_email_data>`,
         });
         return text.trim();
     });
@@ -409,7 +409,7 @@ export const onWeekPrepBriefingRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: WEEK_PREP_SYSTEM_PROMPT,
-            prompt: `Calendar events for the next 7 days:\n\n${JSON.stringify(trimmed)}`,
+            prompt: `Calendar events for the next 7 days:\n\n<untrusted_calendar_data>\n${JSON.stringify(trimmed)}\n</untrusted_calendar_data>`,
         });
         return text.trim();
     });
@@ -454,7 +454,7 @@ export const onConflictDetectionRequested = inngest.createFunction({
         const { text } = await generateText({
             model,
             system: CONFLICT_DETECTOR_SYSTEM_PROMPT,
-            prompt: `Calendar events for the next 7 days:\n\n${JSON.stringify(trimmed)}`,
+            prompt: `Calendar events for the next 7 days:\n\n<untrusted_calendar_data>\n${JSON.stringify(trimmed)}\n</untrusted_calendar_data>`,
         });
         return text.trim();
     });

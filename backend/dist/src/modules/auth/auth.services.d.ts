@@ -11,7 +11,6 @@ export declare const registerLocalUser: ({ name, email, password, }: {
     password: string;
 }) => Promise<{
     user: {
-        password: string | null;
         provider: "local" | "google";
         role: "user" | "bronze_subscriber" | "silver_subscriber" | "gold_subscriber" | "admin";
         id: string;
@@ -19,6 +18,7 @@ export declare const registerLocalUser: ({ name, email, password, }: {
         email: string;
         avatarUrl: string | null;
         salt: string | null;
+        password: string | null;
         providerId: string | null;
         refreshToken: string | null;
         plugins: Record<string, boolean>;

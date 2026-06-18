@@ -348,7 +348,6 @@ export default function GmailSection() {
     try {
       const result = await aiApi.prompt({
         prompt: promptText,
-        useLocalModal: false,
       });
       setAiResult(result ?? "Done.");
     } catch {

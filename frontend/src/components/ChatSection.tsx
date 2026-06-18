@@ -2,9 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import ChatMessage from "../components/ChatMessage";
-import ThinkingIndicator from "../components/ThinkingIndicator";
+import AgentStepsIndicator, {
+  type AgentStepEntry,
+} from "../components/AgentStepsIndicator";
 import { aiApi } from "../lib/api";
 import { KEYBIND_ACTION_EVENT } from "./GlobalKeybinds";
+import {
+  AGENT_STEP_EVENT,
+  type AgentStepEventDetail,
+} from "./SSEListener";
 import gsap from "gsap";
 
 interface Message {
@@ -25,8 +31,9 @@ export default function ChatSection() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [useLocal, setUseLocal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [agentSteps, setAgentSteps] = useState<AgentStepEntry[]>([]);
+  const pendingRequestIdRef = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const emptyStateRef = useRef<HTMLDivElement>(null);
@@ -74,6 +81,34 @@ export default function ChatSection() {
     return () => window.removeEventListener(KEYBIND_ACTION_EVENT, onAction);
   }, []);
 
+  useEffect(() => {
+    const onAgentStepEvent = (e: Event) => {
+      const detail = (e as CustomEvent<AgentStepEventDetail>).detail;
+      if (detail.requestId !== pendingRequestIdRef.current) return;
+
+      if (detail.kind === "step") {
+        const stepLabel =
+          detail.toolCalls.length > 0
+            ? detail.toolCalls.map((call) => call.label).join(", ")
+            : detail.hasText
+              ? "Drafting answer"
+              : "Thinking";
+
+        setAgentSteps((prev) => [
+          ...prev,
+          {
+            stepNumber: detail.stepNumber,
+            label: stepLabel,
+            toolCalls: detail.toolCalls,
+          },
+        ]);
+      }
+    };
+    window.addEventListener(AGENT_STEP_EVENT, onAgentStepEvent);
+    return () =>
+      window.removeEventListener(AGENT_STEP_EVENT, onAgentStepEvent);
+  }, []);
+
   const autoResize = () => {
     const el = textareaRef.current;
     if (!el) return;
@@ -100,13 +135,17 @@ export default function ChatSection() {
       const updatedMessages = [...messages, userMsg];
       setMessages(updatedMessages);
       setLoading(true);
+      setAgentSteps([]);
+
+      const requestId = crypto.randomUUID();
+      pendingRequestIdRef.current = requestId;
 
       const history = messages.map((m) => m.content);
 
       try {
         const message = await aiApi.prompt({
           prompt: trimmed,
-          useLocalModal: useLocal,
+          requestId,
           options: { history },
         });
         setMessages((prev) => [
@@ -121,10 +160,12 @@ export default function ChatSection() {
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
+        pendingRequestIdRef.current = null;
+        setAgentSteps([]);
         setLoading(false);
       }
     },
-    [loading, useLocal, messages],
+    [loading, messages],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -171,51 +212,6 @@ export default function ChatSection() {
             Chat
           </span>
         </div>
-
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.6rem",
-            cursor: "pointer",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "0.58rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--fg-dim)",
-            }}
-          >
-            Local model
-          </span>
-          <div
-            onClick={() => setUseLocal((v) => !v)}
-            style={{
-              width: 32,
-              height: 16,
-              background: useLocal ? "var(--green)" : "var(--border-strong)",
-              position: "relative",
-              cursor: "pointer",
-              transition: "background 0.2s",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 2,
-                left: useLocal ? 16 : 2,
-                width: 12,
-                height: 12,
-                background: "#fff",
-                transition: "left 0.2s",
-              }}
-            />
-          </div>
-        </label>
       </header>
 
       <main
@@ -412,7 +408,7 @@ export default function ChatSection() {
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
             ))}
-            {loading && <ThinkingIndicator />}
+            {loading && <AgentStepsIndicator steps={agentSteps} />}
             {error && (
               <div
                 style={{

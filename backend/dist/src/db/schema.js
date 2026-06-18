@@ -36,7 +36,6 @@ export const userSettings = pgTable("user_settings", {
     preferredModel: varchar("preferred_model", { length: 100 })
         .notNull()
         .default("gemini-flash-lite-latest"),
-    useLocalModel: boolean("use_local_model").notNull().default(false),
     approvalsRequired: boolean("approvals_required").notNull().default(true),
     promptsAsked: integer("prompts_asked").notNull().default(0),
     systemPromptOverride: text("system_prompt_override"),

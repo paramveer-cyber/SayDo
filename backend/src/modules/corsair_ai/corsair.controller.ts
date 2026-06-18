@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 import { sendAIPrompt } from "./corsair.services.js";
 import type { PromptBody } from "./corsair.modals.js";
 import { incrementPromptsAsked } from "../auth/auth.queries.js";
@@ -14,11 +15,12 @@ export const promptAI = async (
   next: NextFunction,
 ) => {
   try {
-    const { prompt, useLocalModal, mcpServer, options } = req.body;
+    const { prompt, mcpServer, requestId, options } = req.body;
     const accessToken = req.headers.authorization?.split(" ")[1] ?? "";
     const userId = req.user as string;
     const userRole = req.userRole ?? "user";
     const settings = req.userSettings;
+    const resolvedRequestId = requestId ?? crypto.randomUUID();
 
     const hasOwnApiKey = Boolean(settings?.geminiApiKey);
     const promptsAsked = settings?.promptsAsked ?? 0;
@@ -33,8 +35,9 @@ export const promptAI = async (
 
     const response = await sendAIPrompt(
       prompt,
-      useLocalModal,
       accessToken,
+      userId,
+      resolvedRequestId,
       mcpServer,
       settings,
       options?.history,

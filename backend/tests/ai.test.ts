@@ -1,4 +1,13 @@
-import { test, assert, assertStatus, json, jsonHeaders, authHeader, summary, BASE_URL } from "./runner.js";
+import {
+  test,
+  assert,
+  assertStatus,
+  json,
+  jsonHeaders,
+  authHeader,
+  summary,
+  BASE_URL,
+} from "./runner.js";
 
 const AI = `${BASE_URL}/ai`;
 
@@ -17,7 +26,6 @@ await test("POST /ai/prompt — returns AI response for valid prompt", async () 
     headers: jsonHeaders(TOKEN),
     body: JSON.stringify({
       prompt: "Say hello in one word.",
-      useLocalModal: false,
     }),
   });
   await assertStatus(response, 200);
@@ -29,7 +37,7 @@ await test("POST /ai/prompt — rejects empty prompt", async () => {
   const response = await fetch(`${AI}/prompt`, {
     method: "POST",
     headers: jsonHeaders(TOKEN),
-    body: JSON.stringify({ prompt: "", useLocalModal: false }),
+    body: JSON.stringify({ prompt: "" }),
   });
   await assertStatus(response, 400);
 });
@@ -38,16 +46,16 @@ await test("POST /ai/prompt — rejects prompt over 512 chars", async () => {
   const response = await fetch(`${AI}/prompt`, {
     method: "POST",
     headers: jsonHeaders(TOKEN),
-    body: JSON.stringify({ prompt: "a".repeat(513), useLocalModal: false }),
+    body: JSON.stringify({ prompt: "a".repeat(513) }),
   });
   await assertStatus(response, 400);
 });
 
-await test("POST /ai/prompt — rejects missing useLocalModal field", async () => {
+await test("POST /ai/prompt — rejects missing prompt field", async () => {
   const response = await fetch(`${AI}/prompt`, {
     method: "POST",
     headers: jsonHeaders(TOKEN),
-    body: JSON.stringify({ prompt: "hello" }),
+    body: JSON.stringify({}),
   });
   await assertStatus(response, 400);
 });
@@ -56,7 +64,7 @@ await test("POST /ai/prompt — rejects unauthenticated request", async () => {
   const response = await fetch(`${AI}/prompt`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: "hello", useLocalModal: false }),
+    body: JSON.stringify({ prompt: "hello" }),
   });
   await assertStatus(response, 401);
 });
@@ -67,7 +75,6 @@ await test("POST /ai/prompt — accepts optional mcpServer param", async () => {
     headers: jsonHeaders(TOKEN),
     body: JSON.stringify({
       prompt: "Say hello in one word.",
-      useLocalModal: false,
       mcpServer: `${BASE_URL}/mcp`,
     }),
   });

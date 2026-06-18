@@ -29,19 +29,20 @@ export const authMiddleware = async (
       return next(ApiError.unAuthorized("Missing Bearer token"));
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1]!;
 
     try {
-      const decoded = verifyToken(token!);
-      req.user = decoded.userId;
-
+      const decoded = verifyToken(token);
       const user = await findUserById(decoded.userId);
       if (!user) return next(ApiError.unAuthorized("User not found"));
+      req.user = user.id;
       req.userRole = user.role;
-
       return next();
-    } catch (err: unknown) {
-      if (!(err instanceof Error) || err.name !== "TokenExpiredError") {
+    } catch (tokenError: unknown) {
+      if (
+        !(tokenError instanceof Error) ||
+        tokenError.name !== "TokenExpiredError"
+      ) {
         return next(ApiError.unAuthorized("Invalid token"));
       }
 
@@ -52,8 +53,8 @@ export const authMiddleware = async (
 
       try {
         const decoded = verifyRefreshToken(refreshToken) as { userId: string };
-
         const user = await findUserByRefreshToken(refreshToken);
+
         if (!user || user.id !== decoded.userId) {
           return next(ApiError.unAuthorized("Invalid refresh token"));
         }

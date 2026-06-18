@@ -7,14 +7,14 @@ const ROLE_RANK = {
 };
 export const roleAtLeast = (role, minimum) => ROLE_RANK[role] >= ROLE_RANK[minimum];
 export const PROMPT_LIMITS = {
-    user: 10,
+    user: 5,
     bronze_subscriber: 50,
     silver_subscriber: 200,
     gold_subscriber: 1000,
     admin: Infinity,
 };
 const WORKFLOW_MINIMUM_ROLE = {
-    "email-priority": "bronze_subscriber",
+    "email-priority": "user",
     "weekly-digest": "bronze_subscriber",
     "daily-digest": "silver_subscriber",
     "unsubscribe-suggestions": "silver_subscriber",

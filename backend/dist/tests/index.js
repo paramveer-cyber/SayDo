@@ -8,6 +8,9 @@ const suites = [
     "calendar.test.ts",
     "ai.test.ts",
     "webhooks.test.ts",
+    "settings.test.ts",
+    "command-center.test.ts",
+    "razorpay.test.ts",
 ];
 console.log("=== Running all test suites ===\n");
 let anyFailed = false;
