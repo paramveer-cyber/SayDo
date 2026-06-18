@@ -18,18 +18,17 @@ const sanitizeSubject = (value) => {
     return sanitized.slice(0, 988);
 };
 export const buildRawEmailBase64 = (fields) => {
-    const lines = [
+    const emailHeaders = [
         `To: ${sanitizeEmailAddress(fields.to)}`,
         `Subject: ${sanitizeSubject(fields.subject)}`,
         fields.cc ? `Cc: ${sanitizeEmailAddress(fields.cc)}` : null,
         fields.bcc ? `Bcc: ${sanitizeEmailAddress(fields.bcc)}` : null,
         "MIME-Version: 1.0",
         "Content-Type: text/plain; charset=UTF-8",
-        "",
-        fields.body,
     ]
         .filter(Boolean)
         .join("\r\n");
+    const lines = `${emailHeaders}\r\n\r\n${fields.body}`;
     return Buffer.from(lines).toString("base64url");
 };
 const normalizeLabelIds = (val) => {
@@ -361,6 +360,7 @@ const deleteGmailPubSubSubscription = async (tenantId) => {
     const projectId = parseProjectFromTopicName(topicName);
     const subscriptionName = `projects/${projectId}/subscriptions/gmail-watch-${tenantId}`;
     const accessToken = await getPubSubAccessToken();
+    console.info(`[pubsub] deleting subscription: ${subscriptionName}`);
     const response = await fetch(`https://pubsub.googleapis.com/v1/${subscriptionName}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -369,7 +369,7 @@ const deleteGmailPubSubSubscription = async (tenantId) => {
         const err = await response.text();
         throw new Error(`Pub/Sub subscription delete failed: ${err}`);
     }
-    console.info(`[pubsub] subscription deleted for tenant=${tenantId}`);
+    console.info(`[pubsub] subscription deleted for tenant=${tenantId} (status=${response.status})`);
 };
 export const stopGmailWatch = async (tenantCorsair, tenantId) => {
     try {
@@ -392,6 +392,7 @@ export const stopGmailWatch = async (tenantCorsair, tenantId) => {
     catch (err) {
         console.error(`Gmail watch stop call threw for tenant=${tenantId}, proceeding to remove subscription anyway:`, err);
     }
+    console.info(`[pubsub] calling deleteGmailPubSubSubscription for tenant=${tenantId}`);
     await deleteGmailPubSubSubscription(tenantId);
 };
 //# sourceMappingURL=gmail.services.js.map

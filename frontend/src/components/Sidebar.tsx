@@ -4,7 +4,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
 
 type SidebarVariant = "main" | "gmail" | "calendar";
 
@@ -91,7 +90,13 @@ const mainNavItems = [
     colorDim: "var(--yellow-dim)",
     icon: (
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="5.25" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle
+          cx="8"
+          cy="5.25"
+          r="2.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
         <path
           d="M2.5 14c0-2.9 2.46-5.25 5.5-5.25S13.5 11.1 13.5 14"
           stroke="currentColor"
@@ -362,11 +367,6 @@ export default function Sidebar({ variant }: { variant: SidebarVariant }) {
 
   useEffect(() => {
     if (!sidebarRef.current) return;
-    gsap.fromTo(
-      sidebarRef.current,
-      { x: -20, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.55, ease: "power4.out" },
-    );
   }, []);
 
   return (

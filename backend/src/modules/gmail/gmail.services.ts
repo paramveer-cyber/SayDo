@@ -64,18 +64,18 @@ export const buildRawEmailBase64 = (fields: {
   cc?: string | undefined;
   bcc?: string | undefined;
 }) => {
-  const lines = [
+  const emailHeaders = [
     `To: ${sanitizeEmailAddress(fields.to)}`,
     `Subject: ${sanitizeSubject(fields.subject)}`,
     fields.cc ? `Cc: ${sanitizeEmailAddress(fields.cc)}` : null,
     fields.bcc ? `Bcc: ${sanitizeEmailAddress(fields.bcc)}` : null,
     "MIME-Version: 1.0",
     "Content-Type: text/plain; charset=UTF-8",
-    "",
-    fields.body,
   ]
     .filter(Boolean)
     .join("\r\n");
+
+  const lines = `${emailHeaders}\r\n\r\n${fields.body}`;
 
   return Buffer.from(lines).toString("base64url");
 };
@@ -585,6 +585,8 @@ const deleteGmailPubSubSubscription = async (
   const subscriptionName = `projects/${projectId}/subscriptions/gmail-watch-${tenantId}`;
   const accessToken = await getPubSubAccessToken();
 
+  console.info(`[pubsub] deleting subscription: ${subscriptionName}`);
+
   const response = await fetch(
     `https://pubsub.googleapis.com/v1/${subscriptionName}`,
     {
@@ -598,7 +600,9 @@ const deleteGmailPubSubSubscription = async (
     throw new Error(`Pub/Sub subscription delete failed: ${err}`);
   }
 
-  console.info(`[pubsub] subscription deleted for tenant=${tenantId}`);
+  console.info(
+    `[pubsub] subscription deleted for tenant=${tenantId} (status=${response.status})`,
+  );
 };
 
 export const stopGmailWatch = async (
@@ -634,5 +638,8 @@ export const stopGmailWatch = async (
     );
   }
 
+  console.info(
+    `[pubsub] calling deleteGmailPubSubSubscription for tenant=${tenantId}`,
+  );
   await deleteGmailPubSubSubscription(tenantId);
 };
