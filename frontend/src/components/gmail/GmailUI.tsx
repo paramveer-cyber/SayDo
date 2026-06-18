@@ -71,8 +71,12 @@ export function IconBtn({
         transition: "background 0.12s, color 0.12s, border-color 0.12s",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = danger ? "var(--red-dim)" : "var(--surface)";
-        e.currentTarget.style.borderColor = danger ? "var(--red)" : "var(--border-strong)";
+        e.currentTarget.style.background = danger
+          ? "var(--red-dim)"
+          : "var(--surface)";
+        e.currentTarget.style.borderColor = danger
+          ? "var(--red)"
+          : "var(--border-strong)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = "none";
@@ -109,11 +113,28 @@ export function EmptyState({ label }: { label: string }) {
         }}
       >
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-          <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M1.5 4.5L8 9L14.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <rect
+            x="1.5"
+            y="3.5"
+            width="13"
+            height="9"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+          />
+          <path
+            d="M1.5 4.5L8 9L14.5 4.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
         </svg>
       </div>
-      <span style={{ fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.02em" }}>{label}</span>
+      <span
+        style={{ fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.02em" }}
+      >
+        {label}
+      </span>
     </div>
   );
 }
@@ -133,7 +154,10 @@ export function LoadingDots() {
         <div
           key={i}
           className="thinking-dot"
-          style={{ animationDelay: `${i * 0.2}s`, borderRadius: "var(--radius-sm)" }}
+          style={{
+            animationDelay: `${i * 0.2}s`,
+            borderRadius: "var(--radius-sm)",
+          }}
         />
       ))}
     </div>
@@ -222,6 +246,15 @@ const HIDDEN_SYSTEM_LABEL_IDS = new Set([
   "CATEGORY_FORUMS",
 ]);
 
+const PRIORITY_LABEL_COLORS: Record<
+  string,
+  { background: string; text: string }
+> = {
+  "Priority/High": { background: "#fde8e8", text: "#b91c1c" },
+  "Priority/Medium": { background: "#fef9c3", text: "#a16207" },
+  "Priority/Low": { background: "#dcfce7", text: "#15803d" },
+};
+
 function humanizeLabelId(labelId: string): string {
   return labelId
     .replace(/^CATEGORY_/, "")
@@ -236,7 +269,10 @@ export function LabelBadges({
   labelsById,
 }: {
   labelIds: string[] | undefined;
-  labelsById: Map<string, { name: string; color?: { textColor: string; backgroundColor: string } }>;
+  labelsById: Map<
+    string,
+    { name: string; color?: { textColor: string; backgroundColor: string } }
+  >;
 }) {
   const visibleLabelIds = (labelIds ?? []).filter(
     (labelId) => !HIDDEN_SYSTEM_LABEL_IDS.has(labelId),
@@ -257,8 +293,12 @@ export function LabelBadges({
       {visibleLabelIds.map((labelId) => {
         const label = labelsById.get(labelId);
         const displayName = label?.name ?? humanizeLabelId(labelId);
-        const backgroundColor = label?.color?.backgroundColor;
-        const textColor = label?.color?.textColor;
+        const priorityColor = label?.name
+          ? PRIORITY_LABEL_COLORS[label.name]
+          : undefined;
+        const backgroundColor =
+          priorityColor?.background ?? label?.color?.backgroundColor;
+        const textColor = priorityColor?.text ?? label?.color?.textColor;
 
         return (
           <span
@@ -270,7 +310,7 @@ export function LabelBadges({
               padding: "0.18rem 0.45rem",
               borderRadius: "var(--radius-sm, 6px)",
               border: backgroundColor
-                ? "1px solid transparent"
+                ? `1px solid ${backgroundColor}`
                 : "1px solid var(--border-strong)",
               background: backgroundColor ?? "var(--surface)",
               color: textColor ?? "var(--fg-dim)",

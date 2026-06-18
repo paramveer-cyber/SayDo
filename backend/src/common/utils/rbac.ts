@@ -29,7 +29,8 @@ export type WorkflowId =
   | "followup-scan"
   | "bulk-cleanup"
   | "week-prep-briefing"
-  | "conflict-detection";
+  | "conflict-detection"
+  | "bulk-prioritize-week";
 
 const WORKFLOW_MINIMUM_ROLE: Record<WorkflowId, UserRole> = {
   "email-priority": "bronze_subscriber",
@@ -40,6 +41,7 @@ const WORKFLOW_MINIMUM_ROLE: Record<WorkflowId, UserRole> = {
   "bulk-cleanup": "gold_subscriber",
   "week-prep-briefing": "bronze_subscriber",
   "conflict-detection": "silver_subscriber",
+  "bulk-prioritize-week": "bronze_subscriber",
 };
 
 export const canAccessWorkflow = (

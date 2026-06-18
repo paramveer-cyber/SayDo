@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { useEffect, useRef } from "react";
+import gsap from "gsap";
 
 type SidebarVariant = "main" | "gmail" | "calendar";
 
@@ -143,6 +144,7 @@ const gmailNavItems = [
   { href: "/dashboard/gmail/spam", label: "Spam" },
   { href: "/dashboard/gmail/trash", label: "Trash" },
   { href: "/dashboard/gmail/labels", label: "Labels" },
+  { href: "/dashboard/gmail/workflows", label: "Workflows" },
 ];
 
 function isPathActive(
@@ -367,6 +369,11 @@ export default function Sidebar({ variant }: { variant: SidebarVariant }) {
 
   useEffect(() => {
     if (!sidebarRef.current) return;
+    gsap.fromTo(
+      sidebarRef.current,
+      { x: -20, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.55, ease: "power4.out" },
+    );
   }, []);
 
   return (

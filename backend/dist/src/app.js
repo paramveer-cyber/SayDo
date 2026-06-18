@@ -5,7 +5,7 @@ import { serve } from "inngest/express";
 import { createBaseMcpServer, createMcpRouter } from "@corsair-dev/mcp";
 import { corsair } from "./corsair.js";
 import { inngest } from "./common/config/inngest.client.js";
-import { onEmailReceivedAssignPriority, onWeeklyDigestRequested, onDailyDigestRequested, onUnsubscribeSuggestionsRequested, onFollowupScanRequested, onBulkCleanupRequested, onWeekPrepBriefingRequested, onConflictDetectionRequested, } from "./modules/inngest/email.functions.js";
+import { onEmailReceivedAssignPriority, onWeeklyDigestRequested, onDailyDigestRequested, onUnsubscribeSuggestionsRequested, onFollowupScanRequested, onBulkCleanupRequested, onWeekPrepBriefingRequested, onConflictDetectionRequested, onBulkPrioritizeWeekRequested, } from "./modules/inngest/email.functions.js";
 import { aiCorsairRouter } from "./modules/corsair_ai/corsair.routes.js";
 import { gmailRouter } from "./modules/gmail/gmail.routes.js";
 import { googleCalendarRouter } from "./modules/googlecalendar/googlecalendar.routes.js";

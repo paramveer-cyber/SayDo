@@ -743,3 +743,90 @@ export const onConflictDetectionRequested: InngestFunction.Any =
       return { tenantId, eventCount: calendarEvents.length, digestText };
     },
   );
+
+export const onBulkPrioritizeWeekRequested: InngestFunction.Any =
+  inngest.createFunction(
+    {
+      id: "on-bulk-prioritize-week-requested",
+      retries: 2,
+      triggers: [{ event: "digest/bulk-prioritize-week.requested" }],
+      concurrency: { limit: 1, key: "event.data.tenantId" },
+    },
+    async ({ event, step }) => {
+      const { tenantId } = event.data as { tenantId: string };
+
+      await step.run("check-workflow-access", () =>
+        assertTenantWorkflowAccess(tenantId, "bulk-prioritize-week"),
+      );
+
+      const recentMessages = (await step.run(
+        "fetch-last-7-days-messages" as never,
+        async () => {
+          const tenantCorsair = corsair.withTenant(tenantId);
+          const sevenDaysAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+          const rows = await tenantCorsair.gmail.db.messages.search({
+            data: { labelIds: { contains: "INBOX" } },
+            limit: 500,
+            offset: 0,
+          });
+
+          const existingPriorityLabelIds =
+            await getExistingPriorityLabelIds(tenantCorsair);
+
+          return (rows as CorsairEntityRow[])
+            .map((row) => row.data)
+            .filter((message) => {
+              const internalDate = Number(message.internalDate);
+              if (!Number.isFinite(internalDate)) return false;
+              if (Date.now() - internalDate > sevenDaysAgoMs) return false;
+              const labelIds: string[] = Array.isArray(message.labelIds)
+                ? message.labelIds
+                : [];
+              return !labelIds.some((labelId) =>
+                existingPriorityLabelIds.has(labelId),
+              );
+            })
+            .map((message) => ({
+              messageId: message.id as string,
+              from: (message.from as string) ?? "",
+              subject: (message.subject as string) ?? "",
+              snippet: (message.snippet as string) ?? "",
+              body: (message.body as string) ?? "",
+              labelIds: Array.isArray(message.labelIds)
+                ? (message.labelIds as string[])
+                : [],
+            }));
+        },
+      )) as Array<{
+        messageId: string;
+        from: string;
+        subject: string;
+        snippet: string;
+        body: string;
+        labelIds: string[];
+      }>;
+
+      await step.run("fire-priority-events-for-each-message", async () => {
+        await Promise.all(
+          recentMessages.map((message) =>
+            inngest.send({
+              name: "email/received",
+              data: {
+                tenantId,
+                messageId: message.messageId,
+                from: message.from,
+                subject: message.subject,
+                snippet: message.snippet,
+                body: message.body,
+                labelIds: message.labelIds,
+              },
+            }),
+          ),
+        );
+        return { fired: recentMessages.length };
+      });
+
+      return { tenantId, queuedForPrioritization: recentMessages.length };
+    },
+  );

@@ -14,6 +14,7 @@ import {
   onBulkCleanupRequested,
   onWeekPrepBriefingRequested,
   onConflictDetectionRequested,
+  onBulkPrioritizeWeekRequested,
 } from "./modules/inngest/email.functions.js";
 import { aiCorsairRouter } from "./modules/corsair_ai/corsair.routes.js";
 import { gmailRouter } from "./modules/gmail/gmail.routes.js";

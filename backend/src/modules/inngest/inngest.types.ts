@@ -1,4 +1,5 @@
 export interface DigestMessage {
+  id?: string;
   from?: string;
   subject?: string;
   snippet?: string;

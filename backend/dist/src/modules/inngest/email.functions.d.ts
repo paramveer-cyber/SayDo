@@ -10,4 +10,5 @@ export declare const onFollowupScanRequested: InngestFunction.Any;
 export declare const onBulkCleanupRequested: InngestFunction.Any;
 export declare const onWeekPrepBriefingRequested: InngestFunction.Any;
 export declare const onConflictDetectionRequested: InngestFunction.Any;
+export declare const onBulkPrioritizeWeekRequested: InngestFunction.Any;
 //# sourceMappingURL=email.functions.d.ts.map

@@ -5,6 +5,7 @@ import { gmailApi } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
 type WorkflowId =
+  | "bulk-prioritize-week"
   | "weekly-digest"
   | "daily-digest"
   | "unsubscribe-suggestions"
@@ -26,6 +27,7 @@ const ROLE_RANK: Record<UserRole, number> = {
 };
 
 const WORKFLOW_MINIMUM_ROLE: Record<WorkflowId, UserRole> = {
+  "bulk-prioritize-week": "bronze_subscriber",
   "weekly-digest": "bronze_subscriber",
   "daily-digest": "silver_subscriber",
   "unsubscribe-suggestions": "silver_subscriber",
@@ -36,6 +38,12 @@ const canAccessWorkflow = (role: UserRole, workflowId: WorkflowId): boolean =>
   ROLE_RANK[role] >= ROLE_RANK[WORKFLOW_MINIMUM_ROLE[workflowId]];
 
 const WORKFLOWS: { id: WorkflowId; label: string; description: string }[] = [
+  {
+    id: "bulk-prioritize-week",
+    label: "Prioritize last 7 days",
+    description:
+      "AI-classify every inbox email from the past week and apply High / Medium / Low labels",
+  },
   {
     id: "daily-digest",
     label: "Daily digest",

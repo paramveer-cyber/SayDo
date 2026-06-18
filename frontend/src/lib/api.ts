@@ -410,6 +410,7 @@ export const gmailApi = {
 
   runWorkflow: (
     workflowId:
+      | "bulk-prioritize-week"
       | "weekly-digest"
       | "daily-digest"
       | "unsubscribe-suggestions"

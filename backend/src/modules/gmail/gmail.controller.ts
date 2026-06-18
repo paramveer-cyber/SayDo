@@ -36,6 +36,7 @@ const WORKFLOW_TO_INNGEST_EVENT: Record<WorkflowId, string> = {
   "week-prep-briefing": "calendar/week-prep.requested",
   "conflict-detection": "calendar/conflict-detection.requested",
   "email-priority": "email/received",
+  "bulk-prioritize-week": "digest/bulk-prioritize-week.requested",
 };
 
 export class GmailController {

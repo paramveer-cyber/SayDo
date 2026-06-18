@@ -22,6 +22,7 @@ const WORKFLOW_MINIMUM_ROLE = {
     "bulk-cleanup": "gold_subscriber",
     "week-prep-briefing": "bronze_subscriber",
     "conflict-detection": "silver_subscriber",
+    "bulk-prioritize-week": "bronze_subscriber",
 };
 export const canAccessWorkflow = (role, workflowId) => roleAtLeast(role, WORKFLOW_MINIMUM_ROLE[workflowId]);
 export const assertWorkflowAccess = (role, workflowId) => {
