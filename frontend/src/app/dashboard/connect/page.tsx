@@ -114,7 +114,7 @@ function ConnectPageInner() {
           alignItems: "center",
           gap: "1rem",
           padding: "2.5rem 2rem",
-          width: 340,
+          width: 440,
           position: "relative",
           zIndex: 1,
         }}

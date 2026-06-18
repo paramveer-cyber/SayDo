@@ -327,6 +327,43 @@ body {
   box-shadow: 5px 5px 0 var(--yellow-dim);
 }
 
+.nb-google-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: 4px 4px 0 var(--border);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.nb-google-wrap:hover {
+  box-shadow: 6px 6px 0 var(--border);
+  transform: translate(-1px, -1px);
+}
+
+.nb-google-wrap:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.nb-google-shapes {
+  position: absolute;
+  top: -11px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transform: rotate(-3deg);
+  transition: transform 0.2s;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.nb-google-wrap:hover .nb-google-shapes {
+  transform: rotate(3deg) translateY(-2px);
+}
+
 .nb-input {
   padding: 0.65rem 0.875rem;
   border: 2px solid var(--border-strong);

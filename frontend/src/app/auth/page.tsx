@@ -171,27 +171,61 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <GoogleLogin
-            onSuccess={({ credential }) => {
-              if (!credential) {
-                setError("Google sign-in failed");
-                return;
-              }
-              setLoading(true);
-              googleLogin(credential)
-                .catch((err) =>
-                  setError(
-                    err instanceof Error
-                      ? err.message
-                      : "Google sign-in failed",
-                  ),
-                )
-                .finally(() => setLoading(false));
-            }}
-            onError={() => setError("Google sign-in failed")}
-            useOneTap={false}
-            width="356"
-          />
+          <div className="nb-google-wrap">
+            <div className="nb-google-shapes">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <rect
+                  x="1"
+                  y="1"
+                  width="8"
+                  height="8"
+                  stroke="var(--red)"
+                  strokeWidth="1.6"
+                />
+              </svg>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <polygon
+                  points="5,0.8 9.2,9 0.8,9"
+                  stroke="var(--yellow)"
+                  strokeWidth="1.6"
+                  fill="none"
+                />
+              </svg>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <circle
+                  cx="5"
+                  cy="5"
+                  r="4"
+                  stroke="var(--blue)"
+                  strokeWidth="1.6"
+                />
+              </svg>
+            </div>
+            <GoogleLogin
+              onSuccess={({ credential }) => {
+                if (!credential) {
+                  setError("Google sign-in failed");
+                  return;
+                }
+                setLoading(true);
+                googleLogin(credential)
+                  .catch((err) =>
+                    setError(
+                      err instanceof Error
+                        ? err.message
+                        : "Google sign-in failed",
+                    ),
+                  )
+                  .finally(() => setLoading(false));
+              }}
+              onError={() => setError("Google sign-in failed")}
+              useOneTap={false}
+              theme="filled_black"
+              shape="rectangular"
+              text="continue_with"
+              width="356"
+            />
+          </div>
 
           <div
             style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
