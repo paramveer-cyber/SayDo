@@ -5,6 +5,7 @@ import { ToastProvider } from "../context/ToastContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import GlobalKeybinds from "../components/GlobalKeybinds";
 import SseListener from "../components/SSEListener";
+import CursorTrail from "../components/CursorTrail";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -50,6 +51,7 @@ export default function RootLayout({
             <ToastProvider>
               <GlobalKeybinds />
               <SseListener />
+              <CursorTrail />
               {children}
             </ToastProvider>
           </AuthProvider>
