@@ -4,9 +4,22 @@ import { corsair } from "../../corsair.js";
 import { inngest } from "../../common/config/inngest.client.js";
 import { getExistingPriorityLabelIds } from "../inngest/email.functions.js";
 import { sendEventToUser } from "../sse/sse.service.js";
-import { findUserById } from "../auth/auth.queries.js";
+import { findUserById, findUserByEmail } from "../auth/auth.queries.js";
 import { canAccessWorkflow } from "../../common/utils/rbac.js";
 const webhooksRouter = Router();
+const resolveTenantFromPubSubPayload = (body) => {
+    try {
+        const messageData = body.message?.data;
+        if (!messageData)
+            return null;
+        const decoded = Buffer.from(messageData, "base64").toString("utf-8");
+        const parsed = JSON.parse(decoded);
+        return parsed.emailAddress ?? null;
+    }
+    catch {
+        return null;
+    }
+};
 webhooksRouter.post("/", async (req, res) => {
     const headers = {};
     for (const [key, value] of Object.entries(req.headers)) {
@@ -16,8 +29,21 @@ webhooksRouter.post("/", async (req, res) => {
             headers[key] = value[0];
         }
     }
-    const tenantId = req.query.tenant;
     const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+    const emailAddressFromPayload = resolveTenantFromPubSubPayload(body);
+    let tenantId = req.query.tenant;
+    if (emailAddressFromPayload) {
+        const matchedUser = await findUserByEmail(emailAddressFromPayload);
+        if (matchedUser) {
+            tenantId = matchedUser.id;
+        }
+        else {
+            console.warn(`webhook received for unknown email: ${emailAddressFromPayload}`);
+            return res
+                .status(200)
+                .json({ success: false, message: "Unknown tenant" });
+        }
+    }
     let result;
     try {
         result = (await processWebhook(corsair, headers, body, {

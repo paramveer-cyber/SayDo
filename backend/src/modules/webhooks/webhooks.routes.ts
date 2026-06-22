@@ -4,7 +4,7 @@ import { corsair } from "../../corsair.js";
 import { inngest } from "../../common/config/inngest.client.js";
 import { getExistingPriorityLabelIds } from "../inngest/email.functions.js";
 import { sendEventToUser } from "../sse/sse.service.js";
-import { findUserById } from "../auth/auth.queries.js";
+import { findUserById, findUserByEmail } from "../auth/auth.queries.js";
 import { canAccessWorkflow } from "../../common/utils/rbac.js";
 import type { UserRole } from "../../common/utils/rbac.js";
 import type {
@@ -13,6 +13,21 @@ import type {
 } from "./webhooks.types.js";
 
 const webhooksRouter = Router();
+
+const resolveTenantFromPubSubPayload = (
+  body: Record<string, unknown>,
+): string | null => {
+  try {
+    const messageData = (body as { message?: { data?: string } }).message?.data;
+    if (!messageData) return null;
+
+    const decoded = Buffer.from(messageData, "base64").toString("utf-8");
+    const parsed = JSON.parse(decoded) as { emailAddress?: string };
+    return parsed.emailAddress ?? null;
+  } catch {
+    return null;
+  }
+};
 
 webhooksRouter.post("/", async (req: Request, res: Response) => {
   const headers: Record<string, string> = {};
@@ -23,10 +38,26 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
     }
   }
 
-  const tenantId = req.query.tenant as string | undefined;
-
   const body =
     typeof req.body === "object" && req.body !== null ? req.body : {};
+
+  const emailAddressFromPayload = resolveTenantFromPubSubPayload(body);
+
+  let tenantId = req.query.tenant as string | undefined;
+
+  if (emailAddressFromPayload) {
+    const matchedUser = await findUserByEmail(emailAddressFromPayload);
+    if (matchedUser) {
+      tenantId = matchedUser.id;
+    } else {
+      console.warn(
+        `webhook received for unknown email: ${emailAddressFromPayload}`,
+      );
+      return res
+        .status(200)
+        .json({ success: false, message: "Unknown tenant" });
+    }
+  }
 
   let result: WebhookProcessedResult;
   try {
