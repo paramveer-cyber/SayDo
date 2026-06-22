@@ -25,6 +25,12 @@ const isStaleWebhookError = (error) => {
     return (error.message.includes("Account not found") ||
         error.status === 404);
 };
+const isNetworkTimeout = (error) => {
+    if (!(error instanceof TypeError))
+        return false;
+    const cause = error.cause;
+    return cause?.code === "ETIMEDOUT" || cause?.code === "UND_ERR_CONNECT_TIMEOUT";
+};
 webhooksRouter.post("/", async (req, res) => {
     const headers = {};
     for (const [key, value] of Object.entries(req.headers)) {
@@ -56,7 +62,10 @@ webhooksRouter.post("/", async (req, res) => {
         }));
     }
     catch (webhookError) {
-        if (isStaleWebhookError(webhookError)) {
+        if (isNetworkTimeout(webhookError)) {
+            console.warn("webhook skipped: Render egress blocked to Google APIs");
+        }
+        else if (isStaleWebhookError(webhookError)) {
             console.warn("webhook skipped (stale):", webhookError.message);
         }
         else {

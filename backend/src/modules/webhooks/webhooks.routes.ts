@@ -33,6 +33,12 @@ const isStaleWebhookError = (error: unknown): boolean => {
   );
 };
 
+const isNetworkTimeout = (error: unknown): boolean => {
+  if (!(error instanceof TypeError)) return false;
+  const cause = (error as { cause?: { code?: string } }).cause;
+  return cause?.code === "ETIMEDOUT" || cause?.code === "UND_ERR_CONNECT_TIMEOUT";
+};
+
 webhooksRouter.post("/", async (req: Request, res: Response) => {
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(req.headers)) {
@@ -67,7 +73,9 @@ webhooksRouter.post("/", async (req: Request, res: Response) => {
       ...(resolvedTenantId && { tenantId: resolvedTenantId }),
     })) as WebhookProcessedResult;
   } catch (webhookError) {
-    if (isStaleWebhookError(webhookError)) {
+    if (isNetworkTimeout(webhookError)) {
+      console.warn("webhook skipped: Render egress blocked to Google APIs");
+    } else if (isStaleWebhookError(webhookError)) {
       console.warn("webhook skipped (stale):", (webhookError as Error).message);
     } else {
       console.error("webhook processing failed:", webhookError);
