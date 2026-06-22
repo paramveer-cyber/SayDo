@@ -704,6 +704,220 @@ function ScrollProgressBar() {
   );
 }
 
+const FIGHTING_TABS = [
+  { label: "Inbox triage", color: "var(--red)" },
+  { label: "Draft replies", color: "var(--border-strong)" },
+  { label: "Book meetings", color: "var(--yellow)" },
+  { label: "Summarize email", color: "var(--border-strong)" },
+  { label: "Find action items", color: "var(--blue)" },
+  { label: "Check availability", color: "var(--green)" },
+];
+
+const SULK_PHRASES = [
+  "pick me!!!",
+  "i'm right here",
+  "hello?? 👋",
+  "rude.",
+  "i do it better",
+  "seriously?",
+  "over here bro",
+  "not cool",
+  "i'm literally so useful",
+  "fine. whatever.",
+  "this is embarrassing",
+  "my turn next ok?",
+];
+
+function FightingTabs() {
+  const [activeId, setActiveId] = React.useState<number | null>(null);
+  const [shoveDir, setShoveDir] = React.useState<
+    Record<number, "left" | "right" | null>
+  >({});
+  const [sulking, setSulking] = React.useState<Record<number, boolean>>({});
+  const [sulkPhrases, setSulkPhrases] = React.useState<Record<number, string>>(
+    {},
+  );
+  const [rotations] = React.useState<number[]>(() =>
+    FIGHTING_TABS.map(() => (Math.random() - 0.5) * 8),
+  );
+  const [floatOffsets, setFloatOffsets] = React.useState<
+    { x: number; y: number }[]
+  >(() => FIGHTING_TABS.map(() => ({ x: 0, y: 0 })));
+
+  useEffect(() => {
+    const intervals: ReturnType<typeof setInterval>[] = [];
+    FIGHTING_TABS.forEach((_, i) => {
+      const drift = () => {
+        setFloatOffsets((prev) => {
+          const next = [...prev];
+          next[i] = {
+            x: (Math.random() - 0.5) * 10,
+            y: (Math.random() - 0.5) * 10,
+          };
+          return next;
+        });
+      };
+      intervals.push(setInterval(drift, 1800 + i * 370));
+    });
+    return () => intervals.forEach(clearInterval);
+  }, []);
+
+  const handleActivate = (id: number) => {
+    if (id === activeId) return;
+    setActiveId(id);
+
+    const newShove: Record<number, "left" | "right"> = {};
+    const newSulk: Record<number, boolean> = {};
+    const newPhrases: Record<number, string> = {};
+    FIGHTING_TABS.forEach((_, i) => {
+      if (i === id) return;
+      newShove[i] = i < id ? "left" : "right";
+      newSulk[i] = Math.random() > 0.3;
+      newPhrases[i] =
+        SULK_PHRASES[Math.floor(Math.random() * SULK_PHRASES.length)];
+    });
+    setShoveDir(newShove);
+    setSulking(newSulk);
+    setSulkPhrases(newPhrases);
+
+    setTimeout(() => {
+      setShoveDir({});
+      setTimeout(() => setSulking({}), 1400);
+    }, 350);
+  };
+
+  return (
+    <div
+      style={{
+        borderTop: "1px solid var(--border)",
+        background: "var(--bg)",
+        padding: "2.2rem 2rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1.25rem",
+        position: "relative",
+        overflow: "visible",
+      }}
+    >
+      <span
+        style={{
+          fontSize: "0.52rem",
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--fg-dim)",
+        }}
+      >
+        What can I do for you
+      </span>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: "1rem",
+          paddingTop: "0.5rem",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        {FIGHTING_TABS.map((tab, i) => {
+          const isActive = activeId === i;
+          const rot = isActive ? 0 : rotations[i];
+          const shove = shoveDir[i];
+          const isSulking = sulking[i];
+          const float = floatOffsets[i];
+
+          const translateX = isActive
+            ? 0
+            : shove === "left"
+              ? -12
+              : shove === "right"
+                ? 12
+                : float.x;
+          const translateY = isActive ? 0 : float.y;
+          const scale = isActive ? 1.08 : 1;
+
+          return (
+            <div
+              key={tab.label}
+              onClick={() => handleActivate(i)}
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.65rem 1.1rem",
+                border: `1px solid ${isActive ? "var(--fg)" : "var(--border-strong)"}`,
+                background: isActive ? "var(--fg)" : "var(--bg)",
+                cursor: "pointer",
+                userSelect: "none",
+                transform: `rotate(${rot}deg) translate(${translateX}px, ${translateY}px) scale(${scale})`,
+                transition:
+                  "transform 0.35s cubic-bezier(.34,1.56,.64,1), background 0.15s, border-color 0.15s",
+                zIndex: isActive ? 10 : 1,
+              }}
+            >
+              {isSulking && !isActive && (
+                <span
+                  key={sulkPhrases[i]}
+                  style={{
+                    position: "absolute",
+                    top: -24,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    fontSize: "0.48rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "lowercase",
+                    color: "var(--fg-dim)",
+                    whiteSpace: "nowrap",
+                    pointerEvents: "none",
+                    fontStyle: "italic",
+                    animation: "sulkFadeIn 0.2s ease forwards",
+                  }}
+                >
+                  {sulkPhrases[i]}
+                </span>
+              )}
+              <div
+                style={{
+                  width: 4,
+                  height: 4,
+                  background: isActive ? "var(--bg)" : tab.color,
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "0.58rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: isActive
+                    ? "var(--bg)"
+                    : tab.color === "var(--border-strong)"
+                      ? "var(--fg-dim)"
+                      : "var(--fg)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {tab.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <style>{`
+        @keyframes sulkFadeIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const auth = useAuth();
   const router = useRouter();
@@ -1164,59 +1378,8 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Bottom capability strip */}
-        <div
-          style={{
-            borderTop: "1px solid var(--border)",
-            display: "grid",
-            gridTemplateColumns: "repeat(6, 1fr)",
-            background: "var(--bg)",
-          }}
-        >
-          {[
-            { label: "Inbox triage", color: "var(--red)" },
-            { label: "Draft replies", color: "var(--border-strong)" },
-            { label: "Book meetings", color: "var(--yellow)" },
-            { label: "Summarize email", color: "var(--border-strong)" },
-            { label: "Find action items", color: "var(--blue)" },
-            { label: "Check availability", color: "var(--green)" },
-          ].map((item, i) => (
-            <div
-              key={item.label}
-              style={{
-                padding: "0.875rem 1.25rem",
-                borderRight: i < 5 ? "1px solid var(--border)" : "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-            >
-              <div
-                style={{
-                  width: 4,
-                  height: 4,
-                  background: item.color,
-                  flexShrink: 0,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: "0.58rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color:
-                    item.color === "var(--border-strong)"
-                      ? "var(--fg-dim)"
-                      : "var(--fg)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* Bottom capability strip — fighting tabs */}
+        <FightingTabs />
       </section>
 
       {/* ── FEATURES ── */}

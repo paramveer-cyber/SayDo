@@ -6,64 +6,86 @@ import type { WebhookProcessedResult } from "./webhooks.types.js";
 
 const webhooksRouter = Router();
 
-const resolveEmailFromPubSubPayload = (
+const decodeEmailFromPubSubPayload = (
   body: Record<string, unknown>,
 ): string | null => {
   try {
-    const messageData = (body as { message?: { data?: string } }).message?.data;
-    if (!messageData) return null;
-
-    const decoded = Buffer.from(messageData, "base64").toString("utf-8");
-    const parsed = JSON.parse(decoded) as { emailAddress?: string };
-    return parsed.emailAddress ?? null;
+    const messageData = (body.message as Record<string, unknown> | undefined)
+      ?.data;
+    if (typeof messageData !== "string") return null;
+    const decoded = JSON.parse(
+      Buffer.from(messageData, "base64").toString("utf-8"),
+    ) as Record<string, unknown>;
+    return typeof decoded.emailAddress === "string"
+      ? decoded.emailAddress
+      : null;
   } catch {
+    console.warn("failed to decode Pub/Sub payload");
     return null;
   }
+};
+
+const isStaleWebhookError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+  return (
+    error.message.includes("Account not found") ||
+    (error as { status?: unknown }).status === 404
+  );
 };
 
 webhooksRouter.post("/", async (req: Request, res: Response) => {
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(req.headers)) {
     if (typeof value === "string") headers[key] = value;
-    else if (Array.isArray(value)) headers[key] = value[0]!;
+    else if (Array.isArray(value)) {
+      headers[key] = value[0]!;
+    }
   }
 
   const body =
     typeof req.body === "object" && req.body !== null ? req.body : {};
 
-  const emailFromPayload = resolveEmailFromPubSubPayload(body);
-  let tenantId = req.query.tenant as string | undefined;
+  const emailFromPayload = decodeEmailFromPubSubPayload(body);
+
+  let resolvedTenantId: string | undefined;
 
   if (emailFromPayload) {
-    const matchedUser = await findUserByEmail(emailFromPayload);
-    if (!matchedUser) {
-      console.warn(`webhook received for unknown email: ${emailFromPayload}`);
+    const user = await findUserByEmail(emailFromPayload);
+    if (!user) {
       return res
         .status(200)
-        .json({ success: false, message: "Unknown tenant" });
+        .json({ success: false, message: "Unknown tenant email" });
     }
-    tenantId = matchedUser.id;
+    resolvedTenantId = user.id;
+  } else {
+    resolvedTenantId = req.query.tenant as string | undefined;
   }
 
-  let result: WebhookProcessedResult | null = null;
+  let result: WebhookProcessedResult;
   try {
     result = (await processWebhook(corsair, headers, body, {
-      ...(tenantId && { tenantId }),
+      ...(resolvedTenantId && { tenantId: resolvedTenantId }),
     })) as WebhookProcessedResult;
   } catch (webhookError) {
-    console.error("webhook processing failed:", webhookError);
+    if (isStaleWebhookError(webhookError)) {
+      console.warn("webhook skipped (stale):", (webhookError as Error).message);
+    } else {
+      console.error("webhook processing failed:", webhookError);
+    }
     return res
       .status(200)
       .json({ success: false, message: "Webhook processing failed" });
   }
 
-  if (result?.responseHeaders) {
+  if (result.responseHeaders) {
     for (const [key, value] of Object.entries(result.responseHeaders)) {
       res.setHeader(key, value);
     }
   }
 
-  return res.status(200).json(result?.response ?? { success: true });
+  return res
+    .status(200)
+    .json(result.response ?? { success: false, message: "No handler matched" });
 });
 
 webhooksRouter.get("/", (_req: Request, res: Response) => {

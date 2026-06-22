@@ -68,6 +68,8 @@ export const onEmailReceivedAssignPriority: InngestFunction.Any =
       id: "on-email-received-assign-priority",
       retries: 3,
       triggers: [{ event: "email/received" }],
+      idempotency: "event.data.messageId",
+      concurrency: { limit: 1, key: "event.data.messageId" },
     },
     async ({ event, step }) => {
       const { messageId, tenantId, from, subject, snippet, body, labelIds } =
