@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { GmailMessageData, GmailMessagePart } from "../../lib/api";
 
 export function ActionBtn({
@@ -374,4 +374,82 @@ export function getBody(data: GmailMessageData): {
   const fallback = data.body || data.snippet || "";
   const isHtml = /<[a-z][\s\S]*>/i.test(fallback);
   return { content: fallback, isHtml };
+}
+
+const MAIL_FRAME_STYLES = `
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #f2f0ec;
+    background: transparent;
+    word-break: break-word;
+    overflow-x: hidden;
+  }
+  a { color: #1b4fd8; }
+  img { max-width: 100%; height: auto; display: block; }
+  table { max-width: 100%; border-collapse: collapse; }
+  pre, code { white-space: pre-wrap; word-break: break-all; }
+  blockquote {
+    margin: 0.5rem 0;
+    padding: 0.25rem 0.75rem;
+    border-left: 3px solid #3a3a3a;
+    color: #888884;
+  }
+`;
+
+function buildSrcdocDocument(rawHtml: string): string {
+  const styleTag = `<style>${MAIL_FRAME_STYLES}</style>`;
+  const hasHtmlTag = /<html[\s>]/i.test(rawHtml);
+
+  if (hasHtmlTag) {
+    return rawHtml.replace(/<head([^>]*)>/i, `<head$1>${styleTag}`);
+  }
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">${styleTag}</head><body>${rawHtml}</body></html>`;
+}
+
+export function SecureMailFrame({ htmlContent }: { htmlContent: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [frameHeight, setFrameHeight] = useState(600);
+
+  const srcdoc = buildSrcdocDocument(htmlContent);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleLoad = () => {
+      try {
+        const scrollHeight = iframe.contentDocument?.body?.scrollHeight;
+        if (scrollHeight && scrollHeight > 0) {
+          setFrameHeight(scrollHeight + 32);
+        }
+      } catch {
+        // sandboxed document — best effort height
+      }
+    };
+
+    iframe.addEventListener("load", handleLoad);
+    return () => iframe.removeEventListener("load", handleLoad);
+  }, [srcdoc]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      title="Email content"
+      srcDoc={srcdoc}
+      sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+      referrerPolicy="no-referrer"
+      style={{
+        width: "100%",
+        height: frameHeight,
+        border: "none",
+        display: "block",
+        background: "transparent",
+      }}
+    />
+  );
 }

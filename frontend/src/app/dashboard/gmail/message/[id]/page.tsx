@@ -12,6 +12,7 @@ import {
   getBody,
   ErrorBanner,
   ActionBtn,
+  SecureMailFrame,
 } from "../../../../../components/gmail/GmailUI";
 import GmailPageHeader from "../../../../../components/gmail/GmailPageHeader";
 
@@ -324,10 +325,7 @@ export default function MessageDetailPage() {
                 }}
               >
                 {isHtml ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: body }}
-                    style={{ fontSize: "0.875rem", lineHeight: 1.75 }}
-                  />
+                  <SecureMailFrame htmlContent={body} />
                 ) : (
                   <div
                     className="prose-response"

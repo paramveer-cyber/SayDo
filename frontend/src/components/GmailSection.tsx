@@ -5,12 +5,12 @@ import {
   gmailApi,
   aiApi,
   type GmailMessage,
-  type GmailMessageData,
   type GmailDraft,
   type GmailLabel,
 } from "../lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { SecureMailFrame, getBody } from "./gmail/GmailUI";
 
 type GmailView =
   | "home"
@@ -23,10 +23,6 @@ type GmailView =
   | "compose"
   | "message"
   | "label-detail";
-
-function getBody(data: GmailMessageData): string {
-  return data.body || data.snippet || "";
-}
 
 function formatDate(ts: string): string {
   const num = Number(ts);
@@ -1754,13 +1750,11 @@ export default function GmailSection() {
                 }}
               >
                 {(() => {
-                  const body = getBody(selectedMsg.data) || "(empty)";
-                  const isHtml = /<[a-z][\s\S]*>/i.test(body);
+                  const { content, isHtml } = getBody(selectedMsg.data);
+                  const bodyText = content || "(empty)";
+
                   return isHtml ? (
-                    <div
-                      dangerouslySetInnerHTML={{ __html: body }}
-                      style={{ fontSize: "0.875rem", lineHeight: 1.75 }}
-                    />
+                    <SecureMailFrame htmlContent={bodyText} />
                   ) : (
                     <div
                       style={{
@@ -1771,7 +1765,7 @@ export default function GmailSection() {
                         color: "var(--fg)",
                       }}
                     >
-                      {body}
+                      {bodyText}
                     </div>
                   );
                 })()}
