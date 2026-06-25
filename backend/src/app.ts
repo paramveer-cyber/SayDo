@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { serve } from "inngest/express";
@@ -89,7 +89,6 @@ app.use("/settings", authMiddleware, settingsRouter);
 app.use("/command-center", authMiddleware, commandCenterRouter);
 app.use("/sse", sseRouter);
 app.use("/api/payments", authMiddleware, razorpayRouter);
-
 app.use("/mcp", authMiddleware, (req, res, next) => {
   const tenantId = req.user as string;
   return createMcpRouter(() =>

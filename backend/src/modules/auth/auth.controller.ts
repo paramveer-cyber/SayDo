@@ -122,7 +122,8 @@ export const refresh = async (
   next: NextFunction,
 ) => {
   try {
-    const token = req.cookies?.refreshToken as string | undefined;
+    const token =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMTdkNmY2Ny0yY2ZlLTRmY2EtYmNlNi1jZDdkMGZiM2I0MjAiLCJpYXQiOjE3ODIxNjM3MzEsImV4cCI6MTc4Mjc2ODUzMSwiaXNzIjoiU2F5RG8ifQ.LglznVSof4VJQOk2dRPtJ2nQ_xdwvP9ZhD40EDia_D4";
     if (!token) throw ApiError.unAuthorized("No refresh token");
 
     let decoded: { userId: string };

@@ -93,6 +93,18 @@ export default function AuthPage() {
     }
   };
 
+  const handleDemoSubmit = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await login("testing.saydo@gmail.com", "@Someone1234");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (status === "loading") return null;
 
   return (
@@ -223,7 +235,7 @@ export default function AuthPage() {
               theme="filled_black"
               shape="rectangular"
               text="continue_with"
-              width="356"
+              width="330"
             />
           </div>
 
@@ -301,6 +313,14 @@ export default function AuthPage() {
               : mode === "login"
                 ? "Sign in"
                 : "Create account"}
+          </button>
+          <button
+            className="nb-btn-primary nb-shine"
+            onClick={handleDemoSubmit}
+            disabled={loading}
+            style={{ width: "100%" }}
+          >
+            {loading ? "Please wait…" : "Use Demo Account"}
           </button>
 
           <p

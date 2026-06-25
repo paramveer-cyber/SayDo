@@ -51,27 +51,23 @@ export function useMessages() {
     setError(null);
     try {
       const { q, labelIds } = currentScope.current;
-      const maxPages = 2;
 
-      const syncResult = await gmailApi.syncDB({
-        labelIds,
-        q,
-        maxPages,
-        fetchFull: false,
-      });
+      await gmailApi.syncDB({ labelIds, q, maxPages: 2, fetchFull: true });
 
-      const nextPageSize = currentPageSize.current + DEFAULT_PAGE_SIZE;
       const data = await gmailApi.listMessages({
         q,
         labelIds,
-        maxResults: nextPageSize,
+        maxResults: DEFAULT_PAGE_SIZE,
+        pageOffset: currentPageSize.current,
       });
       const fetched = Array.isArray(data) ? data : [];
-      currentPageSize.current = nextPageSize;
-      setMessages(fetched);
 
-      const gmailExhausted = syncResult.pagesFetched < maxPages;
-      setHasMore(!gmailExhausted);
+      if (fetched.length > 0) {
+        currentPageSize.current += DEFAULT_PAGE_SIZE;
+        setMessages((prev) => [...prev, ...fetched]);
+      }
+
+      setHasMore(fetched.length === DEFAULT_PAGE_SIZE);
     } catch {
       setError("Failed to load more messages");
     } finally {

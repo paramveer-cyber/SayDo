@@ -498,6 +498,10 @@ const ensureGmailPubSubSubscription = async (
       body: JSON.stringify({
         topic: topicName,
         pushConfig: { pushEndpoint },
+        retryPolicy: {
+          minimumBackoff: "10s",
+          maximumBackoff: "600s",
+        },
       }),
     },
   );
@@ -529,6 +533,29 @@ const ensureGmailPubSubSubscription = async (
   if (!modifyResponse.ok) {
     const err = await modifyResponse.text();
     throw new Error(`Pub/Sub push endpoint update failed: ${err}`);
+  }
+
+  // update retry policy on existing subscription
+  const updateResponse = await fetch(
+    `https://pubsub.googleapis.com/v1/${subscriptionName}?updateMask=retryPolicy`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        retryPolicy: {
+          minimumBackoff: "10s",
+          maximumBackoff: "600s",
+        },
+      }),
+    },
+  );
+
+  if (!updateResponse.ok) {
+    const err = await updateResponse.text();
+    throw new Error(`Pub/Sub retry policy update failed: ${err}`);
   }
 
   // prodn log

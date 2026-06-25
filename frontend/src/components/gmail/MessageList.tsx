@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { type GmailMessage } from "../../lib/api";
 import MessageRow from "./MessageRow";
 import { ActionBtn, EmptyState, ErrorBanner } from "./GmailUI";
+import CatLoader from "./CatLoader";
 
 function SkeletonRow({ delay }: { delay: number }) {
   return (
@@ -108,7 +109,10 @@ interface MessageListProps {
   onBatchTrash?: (ids: string[]) => void;
   onBatchMarkRead?: (ids: string[]) => void;
   onRefresh?: () => void;
-  labelsById?: Map<string, { name: string; color?: { textColor: string; backgroundColor: string } }>;
+  labelsById?: Map<
+    string,
+    { name: string; color?: { textColor: string; backgroundColor: string } }
+  >;
   onLoadMore?: () => void;
   loadingMore?: boolean;
   hasMore?: boolean;
@@ -160,7 +164,8 @@ export default function MessageList({
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        flex: 1,
+        minHeight: 0,
         width: "100%",
         minWidth: 0,
       }}
@@ -262,15 +267,12 @@ export default function MessageList({
         style={{ flex: 1, overflowY: "auto", padding: "0.4rem 0" }}
         className="scrollbar-thin"
       >
-        {loading && (
-          <div className="skeleton-shimmer" style={{ paddingTop: "0.25rem" }}>
-            {Array.from({ length: 10 }).map((_, i) => (
-              <SkeletonRow key={i} delay={i * 0.04} />
-            ))}
-          </div>
+        {(loading || loadingMore) && <CatLoader />}
+        {!loading && !loadingMore && messages.length === 0 && (
+          <EmptyState label={emptyLabel} />
         )}
-        {!loading && messages.length === 0 && <EmptyState label={emptyLabel} />}
         {!loading &&
+          !loadingMore &&
           messages.map((msg) => (
             <MessageRow
               key={msg.id}
@@ -285,21 +287,25 @@ export default function MessageList({
               labelsById={labelsById}
             />
           ))}
-        {!loading && messages.length > 0 && onLoadMore && hasMore && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "0.75rem 0 0.5rem",
-            }}
-          >
-            <ActionBtn
-              onClick={onLoadMore}
-              label={loadingMore ? "Loading…" : "Load more"}
-              small
-            />
-          </div>
-        )}
+        {!loading &&
+          !loadingMore &&
+          messages.length > 0 &&
+          onLoadMore &&
+          hasMore && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "0.75rem 0 0.5rem",
+              }}
+            >
+              <ActionBtn
+                onClick={onLoadMore}
+                label={loadingMore ? "Loading…" : "Load more"}
+                small
+              />
+            </div>
+          )}
       </div>
     </div>
   );

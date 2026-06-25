@@ -9,13 +9,26 @@ import GmailPageHeader from "../../../../components/gmail/GmailPageHeader";
 
 export default function InboxPage() {
   const {
-    messages, loading, loadingMore, hasMore, error,
-    fetchMessages, loadMore, markRead, trashMessage, toggleStar, batchTrash,
+    messages,
+    loading,
+    loadingMore,
+    hasMore,
+    error,
+    fetchMessages,
+    loadMore,
+    markRead,
+    trashMessage,
+    toggleStar,
+    batchTrash,
   } = useMessages();
   const { labels, fetchLabels } = useLabels();
 
-  useEffect(() => { fetchMessages(undefined, "INBOX"); }, [fetchMessages]);
-  useEffect(() => { fetchLabels(); }, [fetchLabels]);
+  useEffect(() => {
+    fetchMessages(undefined, "INBOX");
+  }, [fetchMessages]);
+  useEffect(() => {
+    fetchLabels();
+  }, [fetchLabels]);
 
   const labelsById = useMemo(
     () => new Map(labels.map((l) => [l.data.id, l.data])),
@@ -23,7 +36,16 @@ export default function InboxPage() {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        minWidth: 0,
+        overflow: "hidden",
+      }}
+    >
       <GmailPageHeader title="Inbox" />
 
       <AiBar compact />
@@ -34,9 +56,21 @@ export default function InboxPage() {
         error={error}
         emptyLabel="No messages in inbox"
         onStar={toggleStar}
-        onTrash={async (id) => { try { await trashMessage(id); } catch {} }}
-        onBatchTrash={async (ids) => { try { await batchTrash(ids); } catch {} }}
-        onBatchMarkRead={async (ids) => { try { await markRead(ids); } catch {} }}
+        onTrash={async (id) => {
+          try {
+            await trashMessage(id);
+          } catch {}
+        }}
+        onBatchTrash={async (ids) => {
+          try {
+            await batchTrash(ids);
+          } catch {}
+        }}
+        onBatchMarkRead={async (ids) => {
+          try {
+            await markRead(ids);
+          } catch {}
+        }}
         onRefresh={() => fetchMessages(undefined, "INBOX")}
         labelsById={labelsById}
         onLoadMore={loadMore}
