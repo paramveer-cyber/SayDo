@@ -7,14 +7,33 @@ import { gmailApi } from "../../../../lib/api";
 import GmailPageHeader from "../../../../components/gmail/GmailPageHeader";
 
 export default function SpamPage() {
-  const { messages, loading, error, fetchMessages, toggleStar, deleteMessage } = useMessages();
+  const {
+    messages,
+    loading,
+    error,
+    fetchMessages,
+    toggleStar,
+    deleteMessage,
+    batchMoveToInbox,
+    batchDelete,
+  } = useMessages();
 
   const refetch = () => fetchMessages(undefined, "SPAM");
 
-  useEffect(() => { refetch(); }, [fetchMessages]);
+  useEffect(() => {
+    refetch();
+  }, [fetchMessages]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        minWidth: 0,
+      }}
+    >
       <GmailPageHeader title="Spam" />
       <MessageList
         messages={messages}
@@ -25,17 +44,31 @@ export default function SpamPage() {
         onStar={toggleStar}
         onUntrash={async (id) => {
           try {
-            await gmailApi.modifyMessage(id, { addLabelIds: ["INBOX"], removeLabelIds: ["SPAM"] });
+            await gmailApi.modifyMessage(id, {
+              addLabelIds: ["INBOX"],
+              removeLabelIds: ["SPAM"],
+            });
             refetch();
           } catch {}
         }}
         onDelete={async (id) => {
           if (!confirm("Permanently delete? This cannot be undone.")) return;
-          try { await deleteMessage(id); } catch {}
+          try {
+            await deleteMessage(id);
+          } catch {}
+        }}
+        onBatchMoveToInbox={async (ids) => {
+          try {
+            await batchMoveToInbox(ids, refetch);
+          } catch {}
+        }}
+        onBatchDelete={async (ids) => {
+          try {
+            await batchDelete(ids);
+          } catch {}
         }}
         onRefresh={refetch}
       />
     </div>
   );
 }
-

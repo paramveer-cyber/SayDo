@@ -43,7 +43,6 @@ export default function InboxPage() {
         height: "100%",
         width: "100%",
         minWidth: 0,
-        overflow: "hidden",
       }}
     >
       <GmailPageHeader title="Inbox" />

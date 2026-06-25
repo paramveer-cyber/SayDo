@@ -166,6 +166,52 @@ export function useMessages() {
     setMessages((prev) => prev.filter((m) => !ids.includes(m.data.id)));
   }, []);
 
+  const batchUntrash = useCallback(
+    async (ids: string[], refetch: () => void) => {
+      await gmailApi.batchModify({
+        ids,
+        addLabelIds: ["INBOX"],
+        removeLabelIds: ["TRASH"],
+      });
+      refetch();
+    },
+    [],
+  );
+
+  const batchDelete = useCallback(async (ids: string[]) => {
+    await Promise.all(ids.map((id) => gmailApi.deleteMessage(id)));
+    setMessages((prev) => prev.filter((m) => !ids.includes(m.data.id)));
+  }, []);
+
+  const batchMoveToInbox = useCallback(
+    async (ids: string[], refetch: () => void) => {
+      await gmailApi.batchModify({
+        ids,
+        addLabelIds: ["INBOX"],
+        removeLabelIds: ["SPAM"],
+      });
+      refetch();
+    },
+    [],
+  );
+
+  const batchStar = useCallback(async (ids: string[]) => {
+    await gmailApi.batchModify({ ids, addLabelIds: ["STARRED"] });
+    setMessages((prev) =>
+      prev.map((m) =>
+        ids.includes(m.data.id) && !m.data.labelIds?.includes("STARRED")
+          ? {
+              ...m,
+              data: {
+                ...m.data,
+                labelIds: [...(m.data.labelIds ?? []), "STARRED"],
+              },
+            }
+          : m,
+      ),
+    );
+  }, []);
+
   return {
     messages: sortedMessages,
     loading,
@@ -182,5 +228,9 @@ export function useMessages() {
     deleteMessage,
     toggleStar,
     batchTrash,
+    batchUntrash,
+    batchDelete,
+    batchMoveToInbox,
+    batchStar,
   };
 }

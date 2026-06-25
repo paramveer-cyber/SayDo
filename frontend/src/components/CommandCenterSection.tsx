@@ -11,7 +11,12 @@ import {
   type ConflictDetected,
   type FollowUpDue,
 } from "../lib/api";
-import { ActionBtn, ErrorBanner, LoadingDots, formatDate } from "./gmail/GmailUI";
+import {
+  ActionBtn,
+  ErrorBanner,
+  LoadingDots,
+  formatDate,
+} from "./gmail/GmailUI";
 
 function getTodayBoundsIso(): { timeMin: string; timeMax: string } {
   const now = new Date();
@@ -105,7 +110,14 @@ function WidgetCard({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-          <div style={{ width: 4, height: 4, background: accentColor, flexShrink: 0 }} />
+          <div
+            style={{
+              width: 4,
+              height: 4,
+              background: accentColor,
+              flexShrink: 0,
+            }}
+          />
           <span
             style={{
               fontWeight: 800,
@@ -130,10 +142,7 @@ function WidgetCard({
           {count}
         </span>
       </div>
-      <div
-        style={{ flex: 1, overflowY: "auto" }}
-        className="scrollbar-thin"
-      >
+      <div style={{ flex: 1, overflowY: "auto" }} className="scrollbar-thin">
         {isEmpty ? (
           <div
             style={{
@@ -167,8 +176,19 @@ function ItemRow({
   actions?: React.ReactNode;
 }) {
   return (
-    <div style={{ padding: "0.65rem 1rem", borderBottom: "1px solid var(--border)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem" }}>
+    <div
+      style={{
+        padding: "0.65rem 1rem",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "0.5rem",
+        }}
+      >
         <div style={{ minWidth: 0, flex: 1 }}>
           <div
             style={{
@@ -226,6 +246,10 @@ export default function CommandCenterSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingActionId, setPendingActionId] = useState<string | null>(null);
+  const [ignoredFollowUpIds, setIgnoredFollowUpIds] = useState<Set<string>>(
+    () =>
+      new Set(JSON.parse(localStorage.getItem("ignored-followups") ?? "[]")),
+  );
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
@@ -317,10 +341,21 @@ export default function CommandCenterSection() {
     }
   };
 
+  const ignoreFollowUp = (messageId: string) => {
+    setIgnoredFollowUpIds((prev) => {
+      const next = new Set(prev);
+      next.add(messageId);
+      localStorage.setItem("ignored-followups", JSON.stringify([...next]));
+      return next;
+    });
+  };
+
   const emailsNeedingAttention = overview?.emailsNeedingAttention ?? [];
   const meetingsToday = overview?.meetingsToday ?? [];
   const conflictsDetected = overview?.conflictsDetected ?? [];
-  const followUpsDue = overview?.followUpsDue ?? [];
+  const followUpsDue = (overview?.followUpsDue ?? []).filter(
+    (f) => !ignoredFollowUpIds.has(f.messageId),
+  );
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -336,7 +371,14 @@ export default function CommandCenterSection() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{ width: 4, height: 4, background: "var(--green)", flexShrink: 0 }} />
+          <div
+            style={{
+              width: 4,
+              height: 4,
+              background: "var(--green)",
+              flexShrink: 0,
+            }}
+          />
           <span
             style={{
               fontWeight: 800,
@@ -453,16 +495,22 @@ export default function CommandCenterSection() {
                     title={email.from || "Unknown sender"}
                     subtitle={email.subject}
                     meta={
-                      email.internalDate ? formatDate(email.internalDate) : undefined
+                      email.internalDate
+                        ? formatDate(email.internalDate)
+                        : undefined
                     }
-                    highlightColor={email.isHighPriority ? "var(--red)" : undefined}
+                    highlightColor={
+                      email.isHighPriority ? "var(--red)" : undefined
+                    }
                     actions={
                       <>
                         <ActionBtn
                           small
                           label="Open"
                           onClick={() =>
-                            router.push(`/dashboard/gmail/message/${email.messageId}`)
+                            router.push(
+                              `/dashboard/gmail/message/${email.messageId}`,
+                            )
                           }
                         />
                         <ActionBtn
@@ -500,7 +548,9 @@ export default function CommandCenterSection() {
                           <ActionBtn
                             small
                             label="Open invite"
-                            onClick={() => window.open(meeting.htmlLink, "_blank")}
+                            onClick={() =>
+                              window.open(meeting.htmlLink, "_blank")
+                            }
                           />
                         )}
                         <ActionBtn
@@ -571,6 +621,11 @@ export default function CommandCenterSection() {
                               : "Send nudge"
                           }
                           onClick={() => sendFollowUpNudge(followUp)}
+                        />
+                        <ActionBtn
+                          small
+                          label="Ignore"
+                          onClick={() => ignoreFollowUp(followUp.messageId)}
                         />
                       </>
                     }

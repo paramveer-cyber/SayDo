@@ -6,14 +6,34 @@ import MessageList from "../../../../components/gmail/MessageList";
 import GmailPageHeader from "../../../../components/gmail/GmailPageHeader";
 
 export default function TrashPage() {
-  const { messages, loading, error, fetchMessages, toggleStar, untrashMessage, deleteMessage } = useMessages();
+  const {
+    messages,
+    loading,
+    error,
+    fetchMessages,
+    toggleStar,
+    untrashMessage,
+    deleteMessage,
+    batchUntrash,
+    batchDelete,
+  } = useMessages();
 
   const refetch = () => fetchMessages(undefined, "TRASH");
 
-  useEffect(() => { refetch(); }, [fetchMessages]);
+  useEffect(() => {
+    refetch();
+  }, [fetchMessages]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        minWidth: 0,
+      }}
+    >
       <GmailPageHeader title="Trash" />
       <MessageList
         messages={messages}
@@ -22,10 +42,26 @@ export default function TrashPage() {
         emptyLabel="Trash is empty"
         showTrashActions
         onStar={toggleStar}
-        onUntrash={async (id) => { try { await untrashMessage(id, refetch); } catch {} }}
+        onUntrash={async (id) => {
+          try {
+            await untrashMessage(id, refetch);
+          } catch {}
+        }}
         onDelete={async (id) => {
           if (!confirm("Permanently delete? This cannot be undone.")) return;
-          try { await deleteMessage(id); } catch {}
+          try {
+            await deleteMessage(id);
+          } catch {}
+        }}
+        onBatchUntrash={async (ids) => {
+          try {
+            await batchUntrash(ids, refetch);
+          } catch {}
+        }}
+        onBatchDelete={async (ids) => {
+          try {
+            await batchDelete(ids);
+          } catch {}
         }}
         onRefresh={refetch}
       />

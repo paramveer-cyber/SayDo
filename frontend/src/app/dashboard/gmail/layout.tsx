@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
 import Sidebar from "../../../components/Sidebar";
@@ -15,6 +15,17 @@ export default function GmailLayout({
 }) {
   const { status } = useAuth();
   const router = useRouter();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      await gmailApi.syncDB();
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/auth");
@@ -37,14 +48,25 @@ export default function GmailLayout({
         <Sidebar variant="gmail" />
         <button
           className="nb-btn-secondary"
-          onClick={() => gmailApi.syncDB()}
+          onClick={handleSync}
+          disabled={isSyncing}
           style={{
             margin: "0 0.75rem 0.75rem",
             justifyContent: "center",
             fontSize: "0.65rem",
+            opacity: isSyncing ? 0.6 : 1,
+            cursor: isSyncing ? "not-allowed" : "pointer",
           }}
         >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="none"
+            style={{
+              animation: isSyncing ? "spin 1s linear infinite" : "none",
+            }}
+          >
             <path
               d="M14 8A6 6 0 0 1 2.5 11.5M2 8A6 6 0 0 1 13.5 4.5"
               stroke="currentColor"
@@ -59,7 +81,8 @@ export default function GmailLayout({
               strokeLinejoin="round"
             />
           </svg>
-          Sync
+          {isSyncing ? "Syncing..." : "Sync"}
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </button>
       </div>
       <div

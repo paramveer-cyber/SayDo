@@ -108,6 +108,10 @@ interface MessageListProps {
   onDelete?: (id: string) => void;
   onBatchTrash?: (ids: string[]) => void;
   onBatchMarkRead?: (ids: string[]) => void;
+  onBatchUntrash?: (ids: string[]) => void;
+  onBatchDelete?: (ids: string[]) => void;
+  onBatchMoveToInbox?: (ids: string[]) => void;
+  onBatchStar?: (ids: string[]) => void;
   onRefresh?: () => void;
   labelsById?: Map<
     string,
@@ -130,6 +134,10 @@ export default function MessageList({
   onDelete,
   onBatchTrash,
   onBatchMarkRead,
+  onBatchUntrash,
+  onBatchDelete,
+  onBatchMoveToInbox,
+  onBatchStar,
   onRefresh,
   labelsById,
   onLoadMore,
@@ -194,9 +202,20 @@ export default function MessageList({
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           {selectedIds.size > 0 && (
             <>
+              <span
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  color: "var(--fg-dim)",
+                  letterSpacing: "0.04em",
+                  marginRight: "0.25rem",
+                }}
+              >
+                {selectedIds.size} selected
+              </span>
               {onBatchMarkRead && (
                 <ActionBtn
                   onClick={async () => {
@@ -206,6 +225,33 @@ export default function MessageList({
                   label="Mark read"
                 />
               )}
+              {onBatchStar && (
+                <ActionBtn
+                  onClick={async () => {
+                    await onBatchStar(Array.from(selectedIds));
+                    clearSelection();
+                  }}
+                  label="Star"
+                />
+              )}
+              {onBatchMoveToInbox && (
+                <ActionBtn
+                  onClick={async () => {
+                    await onBatchMoveToInbox(Array.from(selectedIds));
+                    clearSelection();
+                  }}
+                  label="Move to inbox"
+                />
+              )}
+              {onBatchUntrash && (
+                <ActionBtn
+                  onClick={async () => {
+                    await onBatchUntrash(Array.from(selectedIds));
+                    clearSelection();
+                  }}
+                  label="Restore"
+                />
+              )}
               {onBatchTrash && (
                 <ActionBtn
                   onClick={async () => {
@@ -213,6 +259,22 @@ export default function MessageList({
                     clearSelection();
                   }}
                   label="Trash"
+                  danger
+                />
+              )}
+              {onBatchDelete && (
+                <ActionBtn
+                  onClick={async () => {
+                    if (
+                      !confirm(
+                        `Permanently delete ${selectedIds.size} message${selectedIds.size > 1 ? "s" : ""}? This cannot be undone.`,
+                      )
+                    )
+                      return;
+                    await onBatchDelete(Array.from(selectedIds));
+                    clearSelection();
+                  }}
+                  label="Delete forever"
                   danger
                 />
               )}
