@@ -13,9 +13,7 @@ export default function SpamPage() {
     error,
     fetchMessages,
     toggleStar,
-    deleteMessage,
     batchMoveToInbox,
-    batchDelete,
   } = useMessages();
 
   const refetch = () => fetchMessages(undefined, "SPAM");
@@ -51,20 +49,9 @@ export default function SpamPage() {
             refetch();
           } catch {}
         }}
-        onDelete={async (id) => {
-          if (!confirm("Permanently delete? This cannot be undone.")) return;
-          try {
-            await deleteMessage(id);
-          } catch {}
-        }}
         onBatchMoveToInbox={async (ids) => {
           try {
             await batchMoveToInbox(ids, refetch);
-          } catch {}
-        }}
-        onBatchDelete={async (ids) => {
-          try {
-            await batchDelete(ids);
           } catch {}
         }}
         onRefresh={refetch}
