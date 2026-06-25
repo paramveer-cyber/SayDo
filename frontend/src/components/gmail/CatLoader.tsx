@@ -54,7 +54,6 @@ export default function CatLoader() {
         yoyo: true,
         repeat: -1,
       });
-
       gsap.to(frontLeg2, {
         rotation: -20,
         svgOrigin: "340 260",
@@ -64,7 +63,6 @@ export default function CatLoader() {
         repeat: -1,
         delay: bd,
       });
-
       gsap.to(backLeg1, {
         rotation: -20,
         svgOrigin: "225 260",
@@ -74,7 +72,6 @@ export default function CatLoader() {
         repeat: -1,
         delay: bd,
       });
-
       gsap.to(backLeg2, {
         rotation: 20,
         svgOrigin: "340 260",
@@ -94,7 +91,6 @@ export default function CatLoader() {
       });
 
       const lookDur = 1.5;
-
       const lookTl = gsap.timeline({ repeat: -1, delay: 0.5 });
       lookTl
         .to(face, { x: -8, duration: lookDur, ease: "sine.inOut" })
@@ -170,6 +166,24 @@ export default function CatLoader() {
 
       buildBlink(leftLidTop, leftLidBot, 0.3);
       buildBlink(rightLidTop, rightLidBot, 0.3);
+
+      const totalTravel = 900;
+      const shapeDuration = 2.6;
+
+      svg.querySelectorAll<SVGElement>(".chase-shape").forEach((shape) => {
+        const staggerDelay = parseFloat(shape.dataset.stagger ?? "0");
+        gsap.fromTo(
+          shape,
+          { x: totalTravel },
+          {
+            x: -totalTravel,
+            duration: shapeDuration,
+            ease: "none",
+            repeat: -1,
+            delay: staggerDelay,
+          },
+        );
+      });
     }, svg);
 
     return () => ctx.revert();
@@ -189,8 +203,71 @@ export default function CatLoader() {
         id="Cat"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 600 400"
-        style={{ width: "250px", height: "auto" }}
+        style={{ width: "250px", height: "auto", overflow: "visible" }}
       >
+        <defs>
+          <clipPath id="scene-clip">
+            <rect x="0" y="0" width="600" height="400" />
+          </clipPath>
+        </defs>
+
+        <g clipPath="url(#scene-clip)">
+          <circle
+            className="chase-shape"
+            data-stagger="0"
+            cx="580"
+            cy="340"
+            r="16"
+            fill="#F4C430"
+          />
+          <rect
+            className="chase-shape"
+            data-stagger="0.37"
+            x="566"
+            y="320"
+            width="26"
+            height="26"
+            fill="#E63946"
+          />
+          <polygon
+            className="chase-shape"
+            data-stagger="0.74"
+            points="580,360 566,336 594,336"
+            fill="#111111"
+          />
+          <circle
+            className="chase-shape"
+            data-stagger="1.11"
+            cx="580"
+            cy="344"
+            r="11"
+            fill="#1D4ED8"
+          />
+          <rect
+            className="chase-shape"
+            data-stagger="1.48"
+            x="569"
+            y="325"
+            width="20"
+            height="20"
+            fill="#F4C430"
+          />
+          <polygon
+            className="chase-shape"
+            data-stagger="1.85"
+            points="580,360 566,336 594,336"
+            fill="#E63946"
+          />
+          <circle
+            className="chase-shape"
+            data-stagger="2.22"
+            cx="580"
+            cy="336"
+            r="14"
+            fill="#111111"
+          />
+        </g>
+
         <line
           id="ground"
           x1="160"
@@ -229,7 +306,6 @@ export default function CatLoader() {
               }}
             />
           </g>
-
           <g id="Front_Legs">
             <path
               id="front-leg-1"
@@ -252,7 +328,6 @@ export default function CatLoader() {
               }}
             />
           </g>
-
           <g id="Body">
             <path
               id="tail"
@@ -265,7 +340,6 @@ export default function CatLoader() {
                 strokeWidth: "28px",
               }}
             />
-
             <rect
               x="190"
               y="201"
@@ -286,7 +360,6 @@ export default function CatLoader() {
               d="M209.4213,216.2441a58.948,58.948,0,0,1,20.9133-12.2306C231,208,237,241,228,243s-18.5787-26.756-18.5787-26.756Z"
               style={{ fill: "#d48533" }}
             />
-
             <circle cx="362" cy="253" r="11" style={{ fill: "#ffdf45" }} />
             <path
               id="collar"
@@ -299,7 +372,6 @@ export default function CatLoader() {
                 strokeWidth: "12px",
               }}
             />
-
             <g id="Head">
               <g id="Ears">
                 <g id="Left_Ear">
@@ -323,12 +395,10 @@ export default function CatLoader() {
                   />
                 </g>
               </g>
-
               <path
                 d="M430,164.265C430,207.417,395.0771,231,352,231s-78-23.583-78-66.735S315.7189,89,352,89C387.439,89.02,430,121.1331,430,164.265Z"
                 style={{ fill: "#eba13d" }}
               />
-
               <g id="Face">
                 <g id="Left_Eye">
                   <path
