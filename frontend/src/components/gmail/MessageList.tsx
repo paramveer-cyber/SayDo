@@ -105,11 +105,9 @@ interface MessageListProps {
   onStar: (msg: GmailMessage) => void;
   onTrash?: (id: string) => void;
   onUntrash?: (id: string) => void;
-  onDelete?: (id: string) => void;
   onBatchTrash?: (ids: string[]) => void;
   onBatchMarkRead?: (ids: string[]) => void;
   onBatchUntrash?: (ids: string[]) => void;
-  onBatchDelete?: (ids: string[]) => void;
   onBatchMoveToInbox?: (ids: string[]) => void;
   onBatchStar?: (ids: string[]) => void;
   onRefresh?: () => void;
@@ -131,11 +129,9 @@ export default function MessageList({
   onStar,
   onTrash,
   onUntrash,
-  onDelete,
   onBatchTrash,
   onBatchMarkRead,
   onBatchUntrash,
-  onBatchDelete,
   onBatchMoveToInbox,
   onBatchStar,
   onRefresh,
@@ -262,22 +258,6 @@ export default function MessageList({
                   danger
                 />
               )}
-              {onBatchDelete && (
-                <ActionBtn
-                  onClick={async () => {
-                    if (
-                      !confirm(
-                        `Permanently delete ${selectedIds.size} message${selectedIds.size > 1 ? "s" : ""}? This cannot be undone.`,
-                      )
-                    )
-                      return;
-                    await onBatchDelete(Array.from(selectedIds));
-                    clearSelection();
-                  }}
-                  label="Delete forever"
-                  danger
-                />
-              )}
             </>
           )}
         </div>
@@ -344,7 +324,6 @@ export default function MessageList({
               onStar={onStar}
               onTrash={onTrash}
               onUntrash={onUntrash}
-              onDelete={onDelete}
               showTrashActions={showTrashActions}
               labelsById={labelsById}
             />

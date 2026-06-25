@@ -110,10 +110,25 @@ export class GmailController {
     next: NextFunction,
   ) => {
     try {
+      const tenant = this.getTenant(req);
       const message = await gmailServices.getMessage(
-        this.getTenant(req),
+        tenant,
         req.params.messageId,
       );
+
+      if (message && !message.data.payload) {
+        const fullFromApi = await tenant.gmail.api.messages.get({
+          id: req.params.messageId,
+          format: "full",
+        });
+        if (fullFromApi) {
+          return res.status(200).json({
+            ...message,
+            data: { ...message.data, ...fullFromApi },
+          });
+        }
+      }
+
       return res.status(200).json(message);
     } catch (err) {
       next(err);

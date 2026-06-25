@@ -13,9 +13,7 @@ export default function TrashPage() {
     fetchMessages,
     toggleStar,
     untrashMessage,
-    deleteMessage,
     batchUntrash,
-    batchDelete,
   } = useMessages();
 
   const refetch = () => fetchMessages(undefined, "TRASH");
@@ -47,20 +45,9 @@ export default function TrashPage() {
             await untrashMessage(id, refetch);
           } catch {}
         }}
-        onDelete={async (id) => {
-          if (!confirm("Permanently delete? This cannot be undone.")) return;
-          try {
-            await deleteMessage(id);
-          } catch {}
-        }}
         onBatchUntrash={async (ids) => {
           try {
             await batchUntrash(ids, refetch);
-          } catch {}
-        }}
-        onBatchDelete={async (ids) => {
-          try {
-            await batchDelete(ids);
           } catch {}
         }}
         onRefresh={refetch}
