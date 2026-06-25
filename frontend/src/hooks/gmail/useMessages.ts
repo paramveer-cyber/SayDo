@@ -157,6 +157,13 @@ export function useMessages() {
     return { ...msg, data: { ...msg.data, labelIds: optimisticLabelIds } };
   }, []);
 
+  const prependMessage = useCallback((message: GmailMessage) => {
+    setMessages((prev) => {
+      if (prev.some((m) => m.data.id === message.data.id)) return prev;
+      return [message, ...prev];
+    });
+  }, []);
+
   const batchTrash = useCallback(async (ids: string[]) => {
     await gmailApi.batchModify({
       ids,
@@ -227,6 +234,7 @@ export function useMessages() {
     untrashMessage,
     deleteMessage,
     toggleStar,
+    prependMessage,
     batchTrash,
     batchUntrash,
     batchDelete,

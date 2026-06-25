@@ -402,7 +402,7 @@ export default function PricingPage() {
               : "var(--surface)";
             const cardFg = tier.inverted ? "var(--bg)" : "var(--fg)";
             const cardFgDim = tier.inverted
-              ? "rgba(15,15,15,0.55)"
+              ? "color-mix(in srgb, var(--bg) 55%, transparent)"
               : "var(--fg-dim)";
             const isCurrentPlan = currentRole === tier.targetRole;
             const isFreeAndOnFree =
@@ -441,7 +441,7 @@ export default function PricingPage() {
                           ? "var(--fg-dim)"
                           : tier.accentColor,
                       background: tier.inverted
-                        ? "rgba(15,15,15,0.1)"
+                        ? "color-mix(in srgb, var(--bg) 10%, transparent)"
                         : "var(--bg)",
                       padding: "2px 6px",
                       border: `1px solid ${tier.accentColor === "var(--border-strong)" ? "var(--border)" : tier.accentColor}`,
@@ -493,7 +493,7 @@ export default function PricingPage() {
                   style={{
                     height: 1,
                     background: tier.inverted
-                      ? "rgba(15,15,15,0.15)"
+                      ? "color-mix(in srgb, var(--bg) 15%, transparent)"
                       : "var(--border)",
                     marginBottom: "1.25rem",
                   }}

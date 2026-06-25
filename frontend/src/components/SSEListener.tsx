@@ -7,7 +7,7 @@ import { tokenStore } from "../lib/tokenStore";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
-type NewEmailPayload = {
+export type NewEmailPayload = {
   messageId: string;
   from: string;
   subject: string;
@@ -15,6 +15,7 @@ type NewEmailPayload = {
 };
 
 export const AGENT_STEP_EVENT = "corsair:agent-step";
+export const NEW_EMAIL_EVENT = "corsair:new-email";
 
 export type AgentToolCallSummary = {
   toolName: string;
@@ -62,6 +63,10 @@ export default function SseListener() {
         title: payload.subject || "New email",
         message: payload.from,
       });
+
+      window.dispatchEvent(
+        new CustomEvent<NewEmailPayload>(NEW_EMAIL_EVENT, { detail: payload }),
+      );
     });
 
     source.addEventListener("agent_started", (event) => {

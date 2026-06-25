@@ -1589,7 +1589,7 @@ export default function LandingPage() {
                 style={{
                   fontSize: "0.82rem",
                   lineHeight: 1.6,
-                  color: "#000",
+                  color: "var(--bg)",
                   fontWeight: 700,
                   margin: 0,
                 }}
@@ -1641,7 +1641,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "0.78rem",
                 lineHeight: 1.65,
-                color: "rgba(15,15,15,0.6)",
+                color: "var(--fg-dim)",
                 margin: "0 0 1.75rem",
               }}
             >
@@ -1693,7 +1693,7 @@ export default function LandingPage() {
                 right: -30,
                 width: 90,
                 height: 90,
-                border: "2px solid rgba(255,255,255,0.08)",
+                border: "2px solid var(--border)",
                 borderRadius: "50%",
               }}
             />

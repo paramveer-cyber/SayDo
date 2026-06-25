@@ -437,7 +437,14 @@ export default function Sidebar({ variant }: { variant: SidebarVariant }) {
           gap: 2,
         }}
       >
-        <div style={{ padding: "0 1rem", marginBottom: "1.75rem" }}>
+        <div
+          style={{
+            padding: "0 1rem",
+            marginBottom: "1.75rem",
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/")}
+        >
           <BrandLogo />
         </div>
 
