@@ -94,15 +94,16 @@ export default function AuthPage() {
   };
 
   const handleDemoSubmit = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      await login("testing.saydo@gmail.com", "@Someone1234");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    setError("Demo Account is disabled for the time being");
+    // setLoading(true);
+    // try {
+    //   // await login(DEMOMAIL, DEMOPASS);
+
+    // } catch (err: unknown) {
+    //   setError(err instanceof Error ? err.message : "Something went wrong");
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   if (status === "loading") return null;
@@ -317,7 +318,7 @@ export default function AuthPage() {
           <button
             className="nb-btn-primary nb-shine"
             onClick={handleDemoSubmit}
-            disabled={loading}
+            disabled={true}
             style={{ width: "100%" }}
           >
             {loading ? "Please wait…" : "Use Demo Account"}
